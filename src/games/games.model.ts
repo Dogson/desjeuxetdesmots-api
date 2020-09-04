@@ -1,18 +1,22 @@
 import * as mongoose from "mongoose";
+import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 
-export const GameSchema = new mongoose.Schema({
-    lastUpdated: {type: Date, required: true},
-    name: {type: String, required: true},
-    cover: {type: String, required: true},
-    screenshot: {type: String, required: true},
-    releaseDate: {type: Date, required: true},
-});
-
-export interface Game extends mongoose.Document {
-    id: string;
+@Schema()
+export class Game extends mongoose.Document {
+    @Prop({required: true})
     lastUpdated: Date;
+
+    @Prop({required: true})
     name: string;
+
+    @Prop({required: true})
     cover: string;
+
+    @Prop({required: true})
     screenshot: string;
+
+    @Prop({required: true})
     releaseDate: Date;
 }
+
+export const GameSchema = SchemaFactory.createForClass(Game);

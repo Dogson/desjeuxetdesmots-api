@@ -6,7 +6,7 @@ export class CreateGameDto {
 }
 
 export class GetGameDto {
-    readonly id: string;
+    readonly _id: string;
     readonly lastUpdated: Date;
     readonly name: string;
     readonly cover: string;

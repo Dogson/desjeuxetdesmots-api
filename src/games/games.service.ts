@@ -15,17 +15,19 @@ export class GamesService {
     ) {
     }
 
-    async insertGame(createGameDto: CreateGameDto): Promise<Game> {
+    async insertGame(createGameDto: CreateGameDto): Promise<GetGameDto> {
         const newGame = new this.gameModel({
             lastUpdated: new Date(),
             ...createGameDto
         });
-        return newGame.save();
+        const result = await newGame.save();
+        return this.mapResponseToData(result);
     }
 
-    async updateGame(id: string, updateGameDto: Partial<CreateGameDto>): Promise<Game> {
+    async updateGame(id: string, updateGameDto: Partial<CreateGameDto>): Promise<GetGameDto> {
         const game = await this.findAndUpdateGame(id, updateGameDto);
-        return game.save();
+        const result = await game.save();
+        return this.mapResponseToData(result);
     }
 
     async findAllGames(): Promise<GetGameDto[]> {
@@ -76,9 +78,9 @@ export class GamesService {
     }
 
     private mapResponseToData(gameResult: Game): GetGameDto {
-        const {id, lastUpdated, name, cover, screenshot, releaseDate} = gameResult;
+        const {_id, lastUpdated, name, cover, screenshot, releaseDate} = gameResult;
         return {
-            id,
+            _id,
             lastUpdated,
             name,
             cover,
