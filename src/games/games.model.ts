@@ -1,12 +1,18 @@
-export class Game {
+import * as mongoose from "mongoose";
 
-    constructor(
-        public id: string,
-        public lastUpdated: Date,
-        public name: string,
-        public cover: string,
-        public screenshot: string,
-        public relaseDate: Date
-    ) {
-    };
+export const GameSchema = new mongoose.Schema({
+    lastUpdated: {type: Date, required: true},
+    name: {type: String, required: true},
+    cover: {type: String, required: true},
+    screenshot: {type: String, required: true},
+    releaseDate: {type: Date, required: true},
+});
+
+export interface Game extends mongoose.Document {
+    id: string;
+    lastUpdated: Date;
+    name: string;
+    cover: string;
+    screenshot: string;
+    releaseDate: Date;
 }
