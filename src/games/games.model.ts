@@ -1,10 +1,14 @@
 import * as mongoose from "mongoose";
-import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
+import {Prop, Schema, SchemaFactory} from '@nestjs/mongoose';
+import {DEFAULT_SCHEMA_OPTIONS} from "../shared/schema.options";
 
-@Schema()
+@Schema(DEFAULT_SCHEMA_OPTIONS)
 export class Game extends mongoose.Document {
-    @Prop({required: true})
-    lastUpdated: Date;
+    @Prop()
+    _createdAt: Date;
+
+    @Prop()
+    _updatedAt: Date;
 
     @Prop({required: true})
     name: string;

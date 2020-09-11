@@ -7,15 +7,15 @@ export class HttpErrorFilter implements ExceptionFilter {
         const ctx = host.switchToHttp();
         const request = ctx.getRequest()
         const response = ctx.getResponse();
-        const status = exception.getStatus();
+        const status = exception.getStatus && exception.getStatus();
 
         const errorResponse = {
             code: status,
             timeStamp: new Date().toISOString(),
             path: request.url,
             method: request.method,
-            error: exception && exception.getResponse() && exception.getResponse()["error"],
-            message: exception && exception.getResponse() && exception.getResponse()["message"]
+            error: exception.getResponse && exception.getResponse() && exception.getResponse()["error"],
+            message: exception.getResponse && exception.getResponse() && exception.getResponse()["message"]
         }
 
         Logger.error(`${request.method} ${request.url}`, JSON.stringify(errorResponse), 'ExceptionFilter');

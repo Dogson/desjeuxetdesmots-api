@@ -1,6 +1,6 @@
 import {Body, Controller, Delete, Get, Logger, Param, Post, Put, UsePipes} from '@nestjs/common';
 import {GamesService} from "./games.service";
-import {CreateGameDto, GetGameDto} from "./dto/games.dto";
+import {CreateGameDto, GetGameDto, UpdateGameDto} from "./games.dto";
 import {ValidationPipe} from "../shared/validation.pipe";
 
 @Controller('games')
@@ -20,7 +20,7 @@ export class GamesController {
 
     @Put(':id')
     @UsePipes(new ValidationPipe())
-    updateGame(@Param('id') id: string, @Body() updateGameDto: Partial<CreateGameDto>): Promise<GetGameDto> {
+    updateGame(@Param('id') id: string, @Body() updateGameDto: UpdateGameDto): Promise<GetGameDto> {
         this.logger.log(JSON.stringify(updateGameDto));
         return this.gamesService.updateGame(id, updateGameDto);
     }

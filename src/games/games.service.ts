@@ -1,6 +1,6 @@
 import {HttpException, Injectable, NotFoundException} from "@nestjs/common";
 
-import {CreateGameDto, GetGameDto} from "./dto/games.dto";
+import {CreateGameDto, GetGameDto, UpdateGameDto} from "./games.dto";
 import {InjectModel} from "@nestjs/mongoose";
 import {Model} from "mongoose";
 
@@ -9,23 +9,18 @@ import {isObjectId} from "../utils";
 
 @Injectable()
 export class GamesService {
-    private games: Game[] = [];
-
     constructor(
         @InjectModel('Game') private readonly gameModel: Model<Game>
     ) {
     }
 
     async insertGame(createGameDto: CreateGameDto): Promise<GetGameDto> {
-        const newGame = new this.gameModel({
-            lastUpdated: new Date(),
-            ...createGameDto
-        });
+        const newGame = new this.gameModel(createGameDto);
         const result = await newGame.save();
         return this.mapResponseToData(result);
     }
 
-    async updateGame(id: string, updateGameDto: Partial<CreateGameDto>): Promise<GetGameDto> {
+    async updateGame(id: string, updateGameDto: UpdateGameDto): Promise<GetGameDto> {
         const game = await this.findAndUpdateGame(id, updateGameDto);
         const result = await game.save();
         return this.mapResponseToData(result);
@@ -64,12 +59,8 @@ export class GamesService {
         return game;
     }
 
-    private async findAndUpdateGame(id: string, updateGameDto: Partial<CreateGameDto>): Promise<Game> {
-        const updatedProps = {
-            ...updateGameDto,
-            lastUpdated: new Date()
-        }
-        const game = await this.gameModel.findOneAndUpdate({_id: id}, updatedProps, {new: true});
+    private async findAndUpdateGame(id: string, updateGameDto: UpdateGameDto): Promise<Game> {
+        const game = await this.gameModel.findOneAndUpdate({_id: id}, updateGameDto, {new: true});
 
         if (!game) {
             throw new NotFoundException('Could not find game.');
@@ -78,10 +69,11 @@ export class GamesService {
     }
 
     private mapResponseToData(gameResult: Game): GetGameDto {
-        const {_id, lastUpdated, name, cover, screenshot, releaseDate} = gameResult;
+        const {_id, name, _createdAt, _updatedAt, cover, screenshot, releaseDate} = gameResult;
         return {
             _id,
-            lastUpdated,
+            _createdAt,
+            _updatedAt,
             name,
             cover,
             screenshot,
