@@ -2,51 +2,55 @@ import {HttpException, Injectable, NotFoundException} from "@nestjs/common";
 
 import {CreateGameDto, GetGameDto, UpdateGameDto} from "./games.dto";
 import {InjectModel} from "@nestjs/mongoose";
-import {Model} from "mongoose";
 
 import {Game} from "./games.model";
 import {isObjectId} from "../utils";
+import {ERROR_TYPES} from "../shared/const/error.types";
+import {Model} from "mongoose";
 
 @Injectable()
-export class GamesService {
+export class GamesService  {
     constructor(
         @InjectModel('Game') private readonly gameModel: Model<Game>
     ) {
     }
 
-    async insertGame(createGameDto: CreateGameDto): Promise<GetGameDto> {
+    async create(createGameDto: CreateGameDto): Promise<GetGameDto> {
         const newGame = new this.gameModel(createGameDto);
         const result = await newGame.save();
-        return this.mapResponseToData(result);
+        return result.toResponseObject();
     }
 
-    async updateGame(id: string, updateGameDto: UpdateGameDto): Promise<GetGameDto> {
-        const game = await this.findAndUpdateGame(id, updateGameDto);
+    async update(id: string, updateGameDto: UpdateGameDto): Promise<GetGameDto> {
+        const game = await this._findAndUpdate(id, updateGameDto);
         const result = await game.save();
-        return this.mapResponseToData(result);
+        return result.toResponseObject();
     }
 
-    async findAllGames(): Promise<GetGameDto[]> {
+    async findAll(): Promise<GetGameDto[]> {
         const gameResults: Game[] = await this.gameModel.find().exec();
-        return gameResults.map(game => this.mapResponseToData(game))
+        return gameResults.map(game => game.toResponseObject())
     }
 
-    async findOneGame(id: string): Promise<GetGameDto> {
-        const game = await this.findGame(id);
-        return this.mapResponseToData(game);
+    async findOne(id: string): Promise<GetGameDto> {
+        const game = await this._find(id);
+        return game.toResponseObject();
     }
 
-    async deleteGame(id: string): Promise<any> {
+    async delete(id: string): Promise<any> {
         if (!isObjectId(id)) {
-            throw new NotFoundException('Could not find game.');
+            throw new NotFoundException(ERROR_TYPES.not_found("game"));
         }
         const result = await this.gameModel.deleteOne({_id: id}).exec();
         if (result.n === 0) {
-            throw new NotFoundException('Could not find game.');
+            throw new NotFoundException(ERROR_TYPES.not_found("game"));
         }
     }
 
-    private async findGame(id: string): Promise<Game> {
+    private async _find(id: string): Promise<Game> {
+        if (!isObjectId(id)) {
+            throw new NotFoundException(ERROR_TYPES.not_found("game"));
+        }
         let game;
         try {
             game = await this.gameModel.findById(id).exec();
@@ -54,30 +58,20 @@ export class GamesService {
             throw new HttpException(error.message, error.status);
         }
         if (!game) {
-            throw new NotFoundException('Could not find game.');
+            throw new NotFoundException(ERROR_TYPES.not_found("game"));
         }
         return game;
     }
 
-    private async findAndUpdateGame(id: string, updateGameDto: UpdateGameDto): Promise<Game> {
+    private async _findAndUpdate(id: string, updateGameDto: UpdateGameDto): Promise<Game> {
+        if (!isObjectId(id)) {
+            throw new NotFoundException(ERROR_TYPES.not_found("game"));
+        }
         const game = await this.gameModel.findOneAndUpdate({_id: id}, updateGameDto, {new: true});
 
         if (!game) {
-            throw new NotFoundException('Could not find game.');
+            throw new NotFoundException(ERROR_TYPES.not_found("game"));
         }
         return game;
-    }
-
-    private mapResponseToData(gameResult: Game): GetGameDto {
-        const {_id, name, _createdAt, _updatedAt, cover, screenshot, releaseDate} = gameResult;
-        return {
-            _id,
-            _createdAt,
-            _updatedAt,
-            name,
-            cover,
-            screenshot,
-            releaseDate
-        }
     }
 }

@@ -1,12 +1,13 @@
 import {PipeTransform, Injectable, ArgumentMetadata, BadRequestException} from '@nestjs/common';
 import {validate, ValidationError} from 'class-validator';
 import {plainToClass} from 'class-transformer';
+import {ERROR_TYPES} from "../const/error.types";
 
 @Injectable()
 export class ValidationPipe implements PipeTransform<any> {
     async transform(value: any, metadata: ArgumentMetadata) {
         if (value instanceof Object && this.isEmpty(value)) {
-            throw new BadRequestException('Validation failed: no body submitted');
+            throw new BadRequestException(ERROR_TYPES.validation_no_body);
         }
         const {metatype} = metadata;
         if (!metatype || !this.toValidate(metatype)) {
@@ -15,7 +16,7 @@ export class ValidationPipe implements PipeTransform<any> {
         const object = plainToClass(metatype, value);
         const errors: ValidationError[] = await validate(object);
         if (errors.length > 0) {
-            throw new BadRequestException(`Validation failed: ${this.formatErrors(errors)}`);
+            throw new BadRequestException(ERROR_TYPES.validation(this.formatErrors(errors)));
         }
         return value;
     }
