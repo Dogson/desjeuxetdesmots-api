@@ -7,6 +7,9 @@ import {GamesService} from "./games/games.service";
 import {MongooseModule} from "@nestjs/mongoose";
 import {DB_CONFIG} from "./config";
 import * as mongoose from "mongoose";
+import {APP_FILTER, APP_INTERCEPTOR} from "@nestjs/core";
+import {HttpErrorFilter} from "./shared/http-error.filter";
+import {LoggingInterceptor} from "./shared/logging.interceptor";
 
 mongoose.set('useFindAndModify', false);
 
@@ -19,7 +22,15 @@ mongoose.set('useFindAndModify', false);
         AppController
     ],
     providers: [
-        AppService
+        AppService,
+        {
+            provide: APP_FILTER,
+            useClass: HttpErrorFilter
+        },
+        {
+            provide: APP_INTERCEPTOR,
+            useClass: LoggingInterceptor
+        }
     ],
 })
 export class AppModule {

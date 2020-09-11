@@ -1,7 +1,13 @@
+import {IsString, IsDateString} from "class-validator";
+
 export class CreateGameDto {
+    @IsString()
     readonly name: string;
+    @IsString()
     readonly cover: string;
+    @IsString()
     readonly screenshot: string;
+    @IsDateString()
     readonly releaseDate: Date;
 }
 

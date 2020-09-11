@@ -1,10 +1,11 @@
-import {Injectable, NotFoundException} from "@nestjs/common";
+import {HttpException, Injectable, NotFoundException} from "@nestjs/common";
 
 import {CreateGameDto, GetGameDto} from "./dto/games.dto";
 import {InjectModel} from "@nestjs/mongoose";
 import {Model} from "mongoose";
 
 import {Game} from "./games.model";
+import {isObjectId} from "../utils";
 
 @Injectable()
 export class GamesService {
@@ -41,6 +42,9 @@ export class GamesService {
     }
 
     async deleteGame(id: string): Promise<any> {
+        if (!isObjectId(id)) {
+            throw new NotFoundException('Could not find game.');
+        }
         const result = await this.gameModel.deleteOne({_id: id}).exec();
         if (result.n === 0) {
             throw new NotFoundException('Could not find game.');
@@ -52,7 +56,7 @@ export class GamesService {
         try {
             game = await this.gameModel.findById(id).exec();
         } catch (error) {
-            throw new NotFoundException('Could not find game.');
+            throw new HttpException(error.message, error.status);
         }
         if (!game) {
             throw new NotFoundException('Could not find game.');
@@ -61,16 +65,12 @@ export class GamesService {
     }
 
     private async findAndUpdateGame(id: string, updateGameDto: Partial<CreateGameDto>): Promise<Game> {
-        let game;
-        try {
-            const updatedProps = {
-                ...updateGameDto,
-                lastUpdated: new Date()
-            }
-            game = await this.gameModel.findOneAndUpdate({_id: id}, updatedProps, {new: true});
-        } catch (error) {
-            throw new NotFoundException('Could not update game.');
+        const updatedProps = {
+            ...updateGameDto,
+            lastUpdated: new Date()
         }
+        const game = await this.gameModel.findOneAndUpdate({_id: id}, updatedProps, {new: true});
+
         if (!game) {
             throw new NotFoundException('Could not find game.');
         }
