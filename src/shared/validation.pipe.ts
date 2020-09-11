@@ -20,15 +20,15 @@ export class ValidationPipe implements PipeTransform<any> {
         return value;
     }
 
-    private toValidate(metatype: Function): boolean {
-        const types: Function[] = [String, Boolean, Number, Array, Object, Date];
+    private toValidate(metatype): boolean {
+        const types = [String, Boolean, Number, Array, Object, Date];
         return !types.includes(metatype);
     }
 
     private formatErrors(errors: any[]) {
         return errors
             .map(err => {
-                for (let property in err.constraints) {
+                for (const property in err.constraints) {
                     return err.constraints[property];
                 }
             })
