@@ -3,6 +3,7 @@ import {UsersService} from "./users.service";
 import {CreateUserDto, UserResponseObject} from "./users.dto";
 import {ValidationPipe} from "../shared/handler/validation.pipe";
 import {AuthGuard} from "../shared/handler/auth.guard";
+import {User} from "./user.decorator";
 
 @Controller()
 export class UsersController {
@@ -14,8 +15,7 @@ export class UsersController {
      * GET /users
      */
     @Get('users')
-    @UseGuards(new AuthGuard())
-    findAllUsers() {
+    async findAllUsers() {
         return this.usersService.findAll()
     }
 
@@ -24,7 +24,7 @@ export class UsersController {
      * @param id
      */
     @Get('users/:id')
-    findOneUser(@Param('id') id: string): Promise<UserResponseObject> {
+    async findOneUser(@Param('id') id: string): Promise<UserResponseObject> {
         return this.usersService.findOne(id);
     }
 
@@ -34,7 +34,7 @@ export class UsersController {
      */
     @Post('login')
     @UsePipes(new ValidationPipe())
-    login(@Body() data: CreateUserDto): Promise<UserResponseObject> {
+    async login(@Body() data: CreateUserDto): Promise<UserResponseObject> {
         return this.usersService.login(data);
     }
 
@@ -44,7 +44,7 @@ export class UsersController {
      */
     @Post('register')
     @UsePipes(new ValidationPipe())
-    register(@Body() data: CreateUserDto): Promise<UserResponseObject> {
+    async register(@Body() data: CreateUserDto): Promise<UserResponseObject> {
         return this.usersService.register(data)
     }
 }

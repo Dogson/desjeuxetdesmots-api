@@ -4,6 +4,8 @@ import {Prop, Schema, SchemaFactory} from '@nestjs/mongoose';
 import {DEFAULT_SCHEMA_OPTIONS} from "../shared/const/schema.options";
 import {DefaultModel} from "../shared/const/default.model";
 import {UserResponseObject} from "./users.dto";
+import {InternalServerErrorException} from "@nestjs/common";
+import {ERROR_TYPES} from "../shared/const/error.types";
 
 @Schema(DEFAULT_SCHEMA_OPTIONS)
 export class User extends DefaultModel {
@@ -62,14 +64,18 @@ UserSchema.methods = {
      * Generate new JWT token
      */
     getToken: function () {
-        const {_id, username} = this;
-        return jwt.sign(
-            {
-                _id,
-                username
-            },
-            process.env.SECRET,
-            {expiresIn: '7d'})
+        try {
+            const {_id, username} = this;
+            return jwt.sign(
+                {
+                    _id,
+                    username
+                },
+                process.env.SECRET,
+                {expiresIn: '7d'})
+        } catch (err) {
+            throw new InternalServerErrorException(ERROR_TYPES.cannot_generate_token(err))
+        }
     }
 }
 

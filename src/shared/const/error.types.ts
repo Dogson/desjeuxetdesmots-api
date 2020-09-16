@@ -7,6 +7,22 @@ export const ERROR_TYPES = {
         error: "invalid_credentials",
         message: "Invalid username/password."
     },
+    invalid_auth: {
+      error: "invalid_auth",
+      message: "Invalid Authorization header"
+    },
+    token_error: (errorStack) => {
+        return {
+            error: "token_error",
+            message: `Token error: ${errorStack}.`
+        }
+    },
+    cannot_generate_token: (errorStack) => {
+        return {
+            error: "cannot_generate_token",
+            message: `Cannot generate token: ${errorStack}.`
+        }
+    },
     user_already_exists: {
       error: "user_already_exists",
       message: "User already exists"

@@ -17,7 +17,7 @@ export class GamesController {
      */
     @Post()
     @UsePipes(new ValidationPipe())
-    addGame(@Body() createGameDto: CreateGameDto): Promise<GameResponseObject> {
+    async addGame(@Body() createGameDto: CreateGameDto): Promise<GameResponseObject> {
         this.logger.log(JSON.stringify(createGameDto));
         return this.gamesService.create(createGameDto);
     }
@@ -29,7 +29,7 @@ export class GamesController {
      */
     @Put(':id')
     @UsePipes(new ValidationPipe())
-    updateGame(@Param('id') id: string, @Body() updateGameDto: UpdateGameDto): Promise<GameResponseObject> {
+    async updateGame(@Param('id') id: string, @Body() updateGameDto: UpdateGameDto): Promise<GameResponseObject> {
         this.logger.log(JSON.stringify(updateGameDto));
         return this.gamesService.update(id, updateGameDto);
     }
@@ -38,7 +38,7 @@ export class GamesController {
      * GET /games
      */
     @Get()
-    findAllGames(): Promise<GameResponseObject[]> {
+    async findAllGames(): Promise<GameResponseObject[]> {
         return this.gamesService.findAll();
     }
 
@@ -47,7 +47,7 @@ export class GamesController {
      * @param id
      */
     @Get(':id')
-    findOneGame(@Param('id') id: string): Promise<GameResponseObject> {
+    async findOneGame(@Param('id') id: string): Promise<GameResponseObject> {
         return this.gamesService.findOne(id);
     }
 
