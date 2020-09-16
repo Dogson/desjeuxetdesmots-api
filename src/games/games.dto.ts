@@ -1,4 +1,4 @@
-import {IsString, IsDateString, IsOptional} from "class-validator";
+import {IsString, IsDateString, IsOptional, IsUrl} from "class-validator";
 
 /**
  * Request object format used in POSTing a new game
@@ -6,9 +6,9 @@ import {IsString, IsDateString, IsOptional} from "class-validator";
 export class CreateGameDto {
     @IsString()
     readonly name: string;
-    @IsString()
+    @IsUrl()
     readonly cover: string;
-    @IsString()
+    @IsUrl()
     readonly screenshot: string;
     @IsDateString()
     readonly releaseDate: Date;
@@ -21,10 +21,10 @@ export class UpdateGameDto {
     @IsString()
     @IsOptional()
     readonly name: string;
-    @IsString()
+    @IsUrl()
     @IsOptional()
     readonly cover: string;
-    @IsString()
+    @IsUrl()
     @IsOptional()
     readonly screenshot: string;
     @IsDateString()

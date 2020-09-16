@@ -157,7 +157,7 @@ typings/
 .yarn-integrity
 
 # dotenv environment variables file
-.env.local
+.env
 
 # parcel-bundler cache (https://parceljs.org/)
 .cache
@@ -218,5 +218,3 @@ $RECYCLE.BIN/
 
 # Windows shortcuts
 *.lnk
-
-# End of https://www.toptal.com/developers/gitignore/api/windows,node,intellij

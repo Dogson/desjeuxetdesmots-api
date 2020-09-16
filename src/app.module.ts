@@ -9,8 +9,8 @@ import {HttpErrorFilter} from "./shared/handler/http-error.filter";
 import {LoggingInterceptor} from "./shared/handler/logging.interceptor";
 import { UsersModule } from './users/users.module';
 import { ConfigModule } from '@nestjs/config';
+import { MediaModule } from './media/media.module';
 import dotenv = require('dotenv');
-
 
 mongoose.set('useFindAndModify', false);
 mongoose.set('runValidators', true);
@@ -21,7 +21,8 @@ dotenv.config({path: "../.env.local"});
         ConfigModule.forRoot({isGlobal: true}),
         GamesModule,
         MongooseModule.forRoot(process.env.CONNECTION_STRING),
-        UsersModule
+        UsersModule,
+        MediaModule
     ],
     controllers: [
         AppController
