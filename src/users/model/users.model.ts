@@ -1,11 +1,11 @@
 import * as bcrypt from "bcryptjs";
 import * as jwt from "jsonwebtoken";
 import {Prop, Schema, SchemaFactory} from '@nestjs/mongoose';
-import {DEFAULT_SCHEMA_OPTIONS} from "../shared/const/schema.options";
-import {DefaultModel} from "../shared/const/default.model";
-import {UserResponseObject} from "./users.dto";
+import {DEFAULT_SCHEMA_OPTIONS} from "../../shared/const/schema.options";
+import {DefaultModel} from "../../shared/const/default.model";
+import {UserResponseObject} from "../dto/users.dto";
 import {InternalServerErrorException} from "@nestjs/common";
-import {ERROR_TYPES} from "../shared/const/error.types";
+import {ERROR_TYPES} from "../../shared/const/error.types";
 
 @Schema(DEFAULT_SCHEMA_OPTIONS)
 export class User extends DefaultModel {
@@ -22,9 +22,9 @@ export class User extends DefaultModel {
 
     toResponseObject: (showToken) => UserResponseObject;
 
-    comparePassword: (attempt) => Promise<boolean>
+    comparePassword: (attempt) => Promise<boolean>;
 
-    getToken: () => string
+    getToken: () => string;
 
 }
 
@@ -48,7 +48,7 @@ UserSchema.methods = {
             _createdAt,
             _updatedAt,
             username
-        }
+        };
         if (showToken) {
             response.token = this.getToken();
         }
@@ -77,6 +77,6 @@ UserSchema.methods = {
             throw new InternalServerErrorException(ERROR_TYPES.cannot_generate_token(err))
         }
     }
-}
+};
 
 export {UserSchema};

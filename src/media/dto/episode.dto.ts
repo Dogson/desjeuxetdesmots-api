@@ -1,46 +1,52 @@
-import {IsString, IsOptional, IsUrl} from "class-validator";
+import {IsString, IsOptional, IsUrl, IsDateString} from "class-validator";
 
 /**
- * Request object format used in POSTing a new media
+ * Request object format used in POSTing a new episode
  */
-export class CreateMediaDto {
+export class CreateEpisodeDto {
     @IsString()
     readonly name: string;
     @IsUrl()
-    readonly logo: string;
+    readonly image: string;
     @IsString()
     readonly description: string;
     @IsUrl()
     readonly url: string;
+    @IsDateString()
+    readonly releaseDate: Date
 }
 
 /**
- * Request object format used in PUTing a new media
+ * Request object format used in PUTing a new episode
  */
-export class UpdateMediaDto {
+export class UpdateEpisodeDto {
     @IsString()
     @IsOptional()
     readonly name: string;
     @IsUrl()
     @IsOptional()
-    readonly logo: string;
+    readonly image: string;
     @IsString()
     @IsOptional()
     readonly description: string;
     @IsUrl()
     @IsOptional()
     readonly url: string;
+    @IsDateString()
+    @IsOptional()
+    readonly releaseDate: Date
 }
 
 /**
  * Response object format sent by the API
  */
-export class MediaResponseObject {
+export class EpisodeResponseObject {
     readonly _id: string;
     readonly _createdAt: Date;
     readonly _updatedAt: Date;
     readonly name: string;
-    readonly logo: string;
+    readonly image: string;
     readonly description: string;
     readonly url: string;
+    readonly releaseDate: Date;
 }

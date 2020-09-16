@@ -3,7 +3,7 @@ import {MongooseModule} from "@nestjs/mongoose";
 
 import {MediaController} from "./media.controller";
 import {MediaService} from "./media.service";
-import {MediaSchema} from "./media.model";
+import {MediaSchema} from "./model/media.model";
 
 
 @Module({

@@ -1,7 +1,8 @@
-import {Body, Controller, Delete, Get, Logger, Param, Post, Put, UsePipes} from '@nestjs/common';
+import {Body, Controller, Delete, Get, Logger, Param, Post, Put, Query, UsePipes} from '@nestjs/common';
 import {MediaService} from "./media.service";
-import {CreateMediaDto, MediaResponseObject, UpdateMediaDto} from "./media.dto";
+import {CreateMediaDto, MediaResponseObject, UpdateMediaDto} from "./dto/media.dto";
 import {ValidationPipe} from "../shared/handler/validation.pipe";
+import {DEFAULT_MEDIA_QUERY, MediaQuery} from "./query/media.query";
 
 @Controller('media')
 export class MediaController {
@@ -9,6 +10,15 @@ export class MediaController {
 
     constructor(private readonly mediaService: MediaService) {
 
+    }
+
+    /**
+     * POST /generateMedia
+     */
+    @Post('generate')
+    @UsePipes(new ValidationPipe())
+    async generateMedia(): Promise<MediaResponseObject> {
+        return this.mediaService.generateDummy();
     }
 
     /**
@@ -38,8 +48,9 @@ export class MediaController {
      * GET /media
      */
     @Get()
-    async findAllMedia(): Promise<MediaResponseObject[]> {
-        return this.mediaService.findAll();
+    async findAllMedia(@Query() query: MediaQuery): Promise<MediaResponseObject[]> {
+        query = this._mapQueryWithDefault(query);
+        return this.mediaService.findAll(query);
     }
 
     /**
@@ -59,5 +70,12 @@ export class MediaController {
     async deleteMedia(@Param('id') id: string): Promise<any> {
         await this.mediaService.delete(id);
         return null;
+    }
+
+    private _mapQueryWithDefault(query) {
+       return {
+           ...DEFAULT_MEDIA_QUERY,
+           ...query
+       }
     }
 }

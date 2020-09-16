@@ -1,6 +1,6 @@
 import {Body, Controller, Delete, Get, Logger, Param, Post, Put, UsePipes} from '@nestjs/common';
 import {GamesService} from "./games.service";
-import {CreateGameDto, GameResponseObject, UpdateGameDto} from "./games.dto";
+import {CreateGameDto, GameResponseObject, UpdateGameDto} from "./dto/games.dto";
 import {ValidationPipe} from "../shared/handler/validation.pipe";
 
 @Controller('games')

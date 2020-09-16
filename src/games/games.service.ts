@@ -1,9 +1,9 @@
 import {HttpException, Injectable, NotFoundException} from "@nestjs/common";
 
-import {CreateGameDto, GameResponseObject, UpdateGameDto} from "./games.dto";
+import {CreateGameDto, GameResponseObject, UpdateGameDto} from "./dto/games.dto";
 import {InjectModel} from "@nestjs/mongoose";
 
-import {Game} from "./games.model";
+import {Game} from "./model/games.model";
 import {isObjectId} from "../utils";
 import {ERROR_TYPES} from "../shared/const/error.types";
 import {Model} from "mongoose";

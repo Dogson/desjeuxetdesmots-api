@@ -1,6 +1,6 @@
 import {BadRequestException, ForbiddenException, HttpException, Injectable, NotFoundException} from '@nestjs/common';
-import {CreateUserDto, UserResponseObject} from "./users.dto";
-import {User} from "./users.model";
+import {CreateUserDto, UserResponseObject} from "./dto/users.dto";
+import {User} from "./model/users.model";
 import {InjectModel} from "@nestjs/mongoose";
 import {Model} from "mongoose";
 import {ERROR_TYPES} from "../shared/const/error.types";

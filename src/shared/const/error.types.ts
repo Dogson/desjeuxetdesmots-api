@@ -42,5 +42,11 @@ export const ERROR_TYPES = {
             error: "not_found",
             message: `Could not find ${item}.`
         }
+    },
+    duplicate_key: (item) => {
+        return {
+            error: "duplicate_key",
+            message: `a document with unique key-value ${item} already exists in the collection`
+        }
     }
-}
+};

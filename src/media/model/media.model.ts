@@ -1,7 +1,8 @@
 import {Prop, Schema, SchemaFactory} from '@nestjs/mongoose';
-import {DEFAULT_SCHEMA_OPTIONS} from "../shared/const/schema.options";
-import {DefaultModel} from "../shared/const/default.model";
-import {MediaResponseObject} from "./media.dto";
+import {DEFAULT_SCHEMA_OPTIONS} from "../../shared/const/schema.options";
+import {DefaultModel} from "../../shared/const/default.model";
+import {MediaResponseObject} from "../dto/media.dto";
+import {Episode, EpisodeSchema} from "./episode.model";
 
 @Schema(DEFAULT_SCHEMA_OPTIONS)
 export class Media extends DefaultModel {
@@ -12,8 +13,7 @@ export class Media extends DefaultModel {
     name: string;
 
     @Prop({
-        required: true,
-        unique: true
+        required: true
     })
     logo: string;
 
@@ -23,10 +23,15 @@ export class Media extends DefaultModel {
     description: string;
 
     @Prop({
-        required: true,
-        unique: true
+        required: true
     })
     url: string;
+
+    @Prop({
+        type: [EpisodeSchema],
+        required: false
+    })
+    episodes: Episode[];
 
     toResponseObject: () => MediaResponseObject;
 }
@@ -37,8 +42,8 @@ MediaSchema.methods = {
     /**
      * Mapping function that transforms a model into a correct Response Object
      */
-    toResponseObject: function(): MediaResponseObject {
-        const {_id, name, _createdAt, _updatedAt, logo, description, url} = this;
+    toResponseObject: function (): MediaResponseObject {
+        const {_id, name, _createdAt, _updatedAt, logo, description, url, episodes} = this;
         return {
             _id,
             _createdAt,
@@ -46,7 +51,8 @@ MediaSchema.methods = {
             name,
             logo,
             description,
-            url
+            url,
+            episodes
         }
     }
 };

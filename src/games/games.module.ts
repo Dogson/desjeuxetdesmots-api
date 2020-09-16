@@ -3,7 +3,7 @@ import {MongooseModule} from "@nestjs/mongoose";
 
 import {GamesController} from "./games.controller";
 import {GamesService} from "./games.service";
-import {GameSchema} from "./games.model";
+import {GameSchema} from "./model/games.model";
 
 
 @Module({
