@@ -1,7 +1,7 @@
 import {Prop, Schema, SchemaFactory} from '@nestjs/mongoose';
 import {DEFAULT_SCHEMA_OPTIONS} from "../shared/const/schema.options";
 import {DefaultModel} from "../shared/const/default.model";
-import {GetGameDto} from "./games.dto";
+import {GameResponseObject} from "./games.dto";
 
 @Schema(DEFAULT_SCHEMA_OPTIONS)
 export class Game extends DefaultModel {
@@ -25,13 +25,16 @@ export class Game extends DefaultModel {
     })
     releaseDate: Date;
 
-    toResponseObject: () => GetGameDto;
+    toResponseObject: () => GameResponseObject;
 }
 
 const GameSchema = SchemaFactory.createForClass(Game);
 
 GameSchema.methods = {
-    toResponseObject: function() {
+    /**
+     * Mapping function that transforms a model into a correct Response Object
+     */
+    toResponseObject: function(): GameResponseObject {
         const {_id, name, _createdAt, _updatedAt, cover, screenshot, releaseDate} = this;
         return {
             _id,

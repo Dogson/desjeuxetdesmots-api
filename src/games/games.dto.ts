@@ -1,5 +1,8 @@
 import {IsString, IsDateString, IsOptional} from "class-validator";
 
+/**
+ * Request object format used in POSTing a new game
+ */
 export class CreateGameDto {
     @IsString()
     readonly name: string;
@@ -11,6 +14,9 @@ export class CreateGameDto {
     readonly releaseDate: Date;
 }
 
+/**
+ * Request object format used in PUTing a new game
+ */
 export class UpdateGameDto {
     @IsString()
     @IsOptional()
@@ -26,7 +32,10 @@ export class UpdateGameDto {
     readonly releaseDate: Date;
 }
 
-export class GetGameDto {
+/**
+ * Response object format sent by the API
+ */
+export class GameResponseObject {
     readonly _id: string;
     readonly _createdAt: Date;
     readonly _updatedAt: Date;

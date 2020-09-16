@@ -1,5 +1,5 @@
 import {BadRequestException, ForbiddenException, HttpException, Injectable, NotFoundException} from '@nestjs/common';
-import {CreateUserDto, GetUserDto} from "./users.dto";
+import {CreateUserDto, UserResponseObject} from "./users.dto";
 import {User} from "./users.model";
 import {InjectModel} from "@nestjs/mongoose";
 import {Model} from "mongoose";
@@ -12,17 +12,28 @@ export class UsersService {
     ) {
     }
 
-    async findAll(): Promise<GetUserDto[]> {
+    /**
+     * Find all users
+     */
+    async findAll(): Promise<UserResponseObject[]> {
         const userResults: User[] = await this.userModel.find().exec();
         return userResults.map(user => user.toResponseObject(false))
     }
 
-    async findOne(id: string): Promise<GetUserDto> {
+    /**
+     * Find one user by id
+     * @param id
+     */
+    async findOne(id: string): Promise<UserResponseObject> {
         const user = await this._findById(id);
         return user.toResponseObject(true);
     }
 
-    async login(data: CreateUserDto): Promise<GetUserDto> {
+    /**
+     * Find user by credentials
+     * @param data: credentials of user
+     */
+    async login(data: CreateUserDto): Promise<UserResponseObject> {
         const {username, password} = data;
         const user = await this.userModel.findOne({username}).exec();
         if (!user || !(await user.comparePassword(password))) {
@@ -32,7 +43,11 @@ export class UsersService {
         return user.toResponseObject(true);
     }
 
-    async register(data: CreateUserDto): Promise<GetUserDto> {
+    /**
+     * Create new user
+     * @param data : credentials of uer
+     */
+    async register(data: CreateUserDto): Promise<UserResponseObject> {
         const {username} = data;
         const user = await this.userModel.findOne({username}).exec();
         if (user) {
@@ -43,10 +58,20 @@ export class UsersService {
         return result.toResponseObject(true);
     }
 
+    /**
+     * Find user by id
+     * @param id
+     * @private
+     */
     private async _findById(id: string): Promise<User> {
         return this._findWhere({_id: id});
     }
 
+    /**
+     * Find user by any condition
+     * @param condition
+     * @private
+     */
     private async _findWhere(condition: any): Promise<User> {
         let user;
         try {

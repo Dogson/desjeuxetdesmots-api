@@ -1,5 +1,8 @@
 import {IsString, IsOptional, IsNotEmpty} from "class-validator";
 
+/**
+ * Request object format used in POSTing a new user
+ */
 export class CreateUserDto {
     @IsString()
     @IsNotEmpty()
@@ -9,6 +12,9 @@ export class CreateUserDto {
     readonly password: string;
 }
 
+/**
+ * Request object format used in PUTing a new user
+ */
 export class UpdateUserDto {
     @IsString()
     @IsOptional()
@@ -20,7 +26,10 @@ export class UpdateUserDto {
     readonly password: string;
 }
 
-export class GetUserDto {
+/**
+ * Response object format sent by the API
+ */
+export class UserResponseObject {
     readonly _id: string;
     readonly _createdAt: Date;
     readonly _updatedAt: Date;

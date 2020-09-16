@@ -2,7 +2,10 @@ import {CallHandler, ExecutionContext, Injectable, Logger, NestInterceptor} from
 import {Observable} from "rxjs";
 import {tap} from "rxjs/operators";
 
-
+/**
+ * Class allowing to log errors in console
+ * Injected in app module
+ */
 @Injectable()
 export class LoggingInterceptor implements NestInterceptor {
     intercept(

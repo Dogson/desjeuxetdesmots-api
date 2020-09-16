@@ -3,7 +3,7 @@ import * as jwt from "jsonwebtoken";
 import {Prop, Schema, SchemaFactory} from '@nestjs/mongoose';
 import {DEFAULT_SCHEMA_OPTIONS} from "../shared/const/schema.options";
 import {DefaultModel} from "../shared/const/default.model";
-import {GetUserDto} from "./users.dto";
+import {UserResponseObject} from "./users.dto";
 
 @Schema(DEFAULT_SCHEMA_OPTIONS)
 export class User extends DefaultModel {
@@ -18,7 +18,7 @@ export class User extends DefaultModel {
     })
     password: string;
 
-    toResponseObject: (showToken) => GetUserDto;
+    toResponseObject: (showToken) => UserResponseObject;
 
     comparePassword: (attempt) => Promise<boolean>
 
@@ -29,13 +29,19 @@ export class User extends DefaultModel {
 const UserSchema = SchemaFactory.createForClass(User);
 
 UserSchema.pre<User>('save', async function () {
+    /**
+     * Hashing passsword before each new save
+     */
     this.password = await bcrypt.hash(this.password, 10);
 });
 
 UserSchema.methods = {
-    toResponseObject: function (showToken = true) {
+    /**
+     * Mapping function that transforms a model into a correct Response Object
+     */
+    toResponseObject: function (showToken = true): UserResponseObject {
         const {_id, _createdAt, _updatedAt, username} = this;
-        const response: GetUserDto = {
+        const response: UserResponseObject = {
             _id,
             _createdAt,
             _updatedAt,
@@ -46,9 +52,15 @@ UserSchema.methods = {
         }
         return response;
     },
+    /**
+     * Checking if password is identical to hashed one
+     */
     comparePassword: async function (attempt) {
         return await bcrypt.compare(attempt, this.password);
     },
+    /**
+     * Generate new JWT token
+     */
     getToken: function () {
         const {_id, username} = this;
         return jwt.sign(

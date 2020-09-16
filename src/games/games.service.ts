@@ -1,6 +1,6 @@
 import {HttpException, Injectable, NotFoundException} from "@nestjs/common";
 
-import {CreateGameDto, GetGameDto, UpdateGameDto} from "./games.dto";
+import {CreateGameDto, GameResponseObject, UpdateGameDto} from "./games.dto";
 import {InjectModel} from "@nestjs/mongoose";
 
 import {Game} from "./games.model";
@@ -15,28 +15,48 @@ export class GamesService  {
     ) {
     }
 
-    async create(createGameDto: CreateGameDto): Promise<GetGameDto> {
+    /**
+     * Create a new game
+     * @param createGameDto
+     */
+    async create(createGameDto: CreateGameDto): Promise<GameResponseObject> {
         const newGame = new this.gameModel(createGameDto);
         const result = await newGame.save();
         return result.toResponseObject();
     }
 
-    async update(id: string, updateGameDto: UpdateGameDto): Promise<GetGameDto> {
+    /**
+     * Update existing game
+     * @param id
+     * @param updateGameDto
+     */
+    async update(id: string, updateGameDto: UpdateGameDto): Promise<GameResponseObject> {
         const game = await this._findAndUpdate(id, updateGameDto);
         const result = await game.save();
         return result.toResponseObject();
     }
 
-    async findAll(): Promise<GetGameDto[]> {
+    /**
+     * Find all games
+     */
+    async findAll(): Promise<GameResponseObject[]> {
         const gameResults: Game[] = await this.gameModel.find().exec();
         return gameResults.map(game => game.toResponseObject())
     }
 
-    async findOne(id: string): Promise<GetGameDto> {
+    /**
+     * Find game by id
+     * @param id
+     */
+    async findOne(id: string): Promise<GameResponseObject> {
         const game = await this._find(id);
         return game.toResponseObject();
     }
 
+    /**
+     * Delete game
+     * @param id
+     */
     async delete(id: string): Promise<any> {
         if (!isObjectId(id)) {
             throw new NotFoundException(ERROR_TYPES.not_found("game"));

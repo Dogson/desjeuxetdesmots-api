@@ -1,6 +1,9 @@
 import {ArgumentsHost, Catch, ExceptionFilter, HttpException, Logger} from "@nestjs/common";
 
-
+/**
+ * Class generating sexier HTTP errors
+ * Injected in app modules dependencies
+ */
 @Catch()
 export class HttpErrorFilter implements ExceptionFilter {
     catch(exception: HttpException, host: ArgumentsHost) {

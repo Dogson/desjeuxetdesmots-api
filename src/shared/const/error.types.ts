@@ -1,3 +1,7 @@
+/**
+ * Various error messages returned for different HTTP errors
+ */
+
 export const ERROR_TYPES = {
     invalid_credentials: {
         error: "invalid_credentials",

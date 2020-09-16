@@ -3,6 +3,11 @@ import {validate, ValidationError} from 'class-validator';
 import {plainToClass} from 'class-transformer';
 import {ERROR_TYPES} from "../const/error.types";
 
+/**
+ * Class used in validating request bodies
+ * Allow to generate more human-friendly methods
+ * Injectable in controllers
+ */
 @Injectable()
 export class ValidationPipe implements PipeTransform<any> {
     async transform(value: any, metadata: ArgumentMetadata) {
