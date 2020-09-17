@@ -1,7 +1,7 @@
 import {
     ForbiddenException,
     HttpException,
-    Injectable,
+    Injectable, InternalServerErrorException,
     NotFoundException
 } from "@nestjs/common";
 
@@ -9,10 +9,10 @@ import {CreateMediaDto, MediaResponseObject, UpdateMediaDto} from "./dto/media.d
 import {InjectModel} from "@nestjs/mongoose";
 
 import {Media} from "./model/media.model";
-import {isObjectId} from "../utils";
+import {isObjectId} from "../shared/utils/utils";
 import {ERROR_TYPES} from "../shared/const/error.types";
 import {Model} from "mongoose";
-import {CreateEpisodeDto} from "./dto/episode.dto";
+import {parseRssMedia} from "./helpers/rss.parser";
 
 @Injectable()
 export class MediaService {
@@ -22,40 +22,22 @@ export class MediaService {
     }
 
     /**
-     * Creates a dummy media with episode
+     * Create a media and generate all episodes from a RSS feed URL
      */
-    async generateDummy(): Promise<MediaResponseObject> {
+    async generateMediaAndEpisode(feedUrl): Promise<MediaResponseObject> {
         try {
-            const dummyMedia: CreateMediaDto = {
-                name: "kik",
-                description: "descirpiton sisi",
-                logo: "https://sisi.com",
-                url: "https://sisi.net"
-            };
-            const dummyEpisodes: CreateEpisodeDto[] =
-                [{
-                    name: "episode1",
-                    description: "desciption episode 1",
-                    image: "https://lol.com",
-                    url: "https://soundcloud.com",
-                    releaseDate: new Date()
-                },
-                    {
-                        name: "episode2",
-                        description: "desciption episode 2",
-                        image: "https://lo2l.com",
-                        url: "https://soundc2loud.com",
-                        releaseDate: new Date()
-                    }];
-            const newMedia = new this.mediaModel({...dummyMedia, episodes: dummyEpisodes});
+            const generatedMedia = await parseRssMedia(feedUrl);
+            const newMedia = new this.mediaModel(generatedMedia);
             const result = await newMedia.save();
             return result.toResponseObject();
         } catch (err) {
             if (err && err.code === 11000) {
                 throw new ForbiddenException(ERROR_TYPES.duplicate_key(JSON.stringify(err.keyValue)));
-            } else {
+            }
+            if (err && err.error) {
                 throw err;
             }
+            throw new InternalServerErrorException(ERROR_TYPES.wrong_rss_format(err))
         }
     }
 
@@ -121,13 +103,13 @@ export class MediaService {
      * @param id
      */
     async delete(id: string): Promise<any> {
-            if (!isObjectId(id)) {
-                throw new NotFoundException(ERROR_TYPES.not_found("media"));
-            }
-            const result = await this.mediaModel.deleteOne({_id: id}).exec();
-            if (result.n === 0) {
-                throw new NotFoundException(ERROR_TYPES.not_found("media"));
-            }
+        if (!isObjectId(id)) {
+            throw new NotFoundException(ERROR_TYPES.not_found("media"));
+        }
+        const result = await this.mediaModel.deleteOne({_id: id}).exec();
+        if (result.n === 0) {
+            throw new NotFoundException(ERROR_TYPES.not_found("media"));
+        }
     }
 
     private async _find(id: string): Promise<Media> {

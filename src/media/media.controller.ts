@@ -17,8 +17,8 @@ export class MediaController {
      */
     @Post('generate')
     @UsePipes(new ValidationPipe())
-    async generateMedia(): Promise<MediaResponseObject> {
-        return this.mediaService.generateDummy();
+    async generateMedia(@Body("feedUrl") feedUrl: string): Promise<MediaResponseObject> {
+        return this.mediaService.generateMediaAndEpisode(feedUrl);
     }
 
     /**

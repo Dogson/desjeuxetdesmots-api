@@ -4,7 +4,7 @@ import {CreateGameDto, GameResponseObject, UpdateGameDto} from "./dto/games.dto"
 import {InjectModel} from "@nestjs/mongoose";
 
 import {Game} from "./model/games.model";
-import {isObjectId} from "../utils";
+import {isObjectId} from "../shared/utils/utils";
 import {ERROR_TYPES} from "../shared/const/error.types";
 import {Model} from "mongoose";
 

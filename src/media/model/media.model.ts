@@ -25,7 +25,7 @@ export class Media extends DefaultModel {
     @Prop({
         required: true
     })
-    url: string;
+    feedUrl: string;
 
     @Prop({
         type: [EpisodeSchema],
@@ -43,7 +43,7 @@ MediaSchema.methods = {
      * Mapping function that transforms a model into a correct Response Object
      */
     toResponseObject: function (): MediaResponseObject {
-        const {_id, name, _createdAt, _updatedAt, logo, description, url, episodes} = this;
+        const {_id, name, _createdAt, _updatedAt, logo, description, feedUrl, episodes} = this;
         return {
             _id,
             _createdAt,
@@ -51,7 +51,7 @@ MediaSchema.methods = {
             name,
             logo,
             description,
-            url,
+            feedUrl,
             episodes
         }
     }

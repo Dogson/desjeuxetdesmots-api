@@ -48,5 +48,11 @@ export const ERROR_TYPES = {
             error: "duplicate_key",
             message: `a document with unique key-value ${item} already exists in the collection`
         }
+    },
+    wrong_rss_format: (err) => {
+        return {
+            error: "wrong_rss_format",
+            message: `This error occured during the parsing of the RSS feed: ${err}`
+        }
     }
 };

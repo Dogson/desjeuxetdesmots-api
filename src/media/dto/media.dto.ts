@@ -1,5 +1,5 @@
 import {IsString, IsOptional, IsUrl} from "class-validator";
-import {EpisodeResponseObject} from "./episode.dto";
+import {CreateEpisodeDto, EpisodeResponseObject} from "./episode.dto";
 
 /**
  * Request object format used in POSTing a new media
@@ -12,7 +12,9 @@ export class CreateMediaDto {
     @IsString()
     readonly description: string;
     @IsUrl()
-    readonly url: string;
+    readonly feedUrl: string;
+    @IsOptional()
+    readonly episodes: CreateEpisodeDto[]
 }
 
 /**
@@ -30,7 +32,7 @@ export class UpdateMediaDto {
     readonly description: string;
     @IsUrl()
     @IsOptional()
-    readonly url: string;
+    readonly feedUrl: string;
 }
 
 /**
@@ -43,6 +45,6 @@ export class MediaResponseObject {
     readonly name: string;
     readonly logo: string;
     readonly description: string;
-    readonly url: string;
+    readonly feedUrl: string;
     readonly episodes: EpisodeResponseObject[];
 }

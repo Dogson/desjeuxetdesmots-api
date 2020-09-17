@@ -32,10 +32,13 @@
     "class-validator": "^0.12.2",
     "dotenv": "^8.2.0",
     "jsonwebtoken": "^8.5.1",
+    "lodash": "^4.17.20",
+    "moment": "^2.28.0",
     "mongoose": "^5.10.3",
     "pg": "^8.3.3",
     "reflect-metadata": "^0.1.13",
     "rimraf": "^3.0.2",
+    "rss-parser": "^3.9.0",
     "rxjs": "^6.5.4",
     "rxjs-compat": "^6.6.2",
     "typeorm": "^0.2.25"
