@@ -2,6 +2,7 @@ import {Prop, Schema, SchemaFactory} from '@nestjs/mongoose';
 import {DEFAULT_SCHEMA_OPTIONS} from "../../shared/const/schema.options";
 import {DefaultModel} from "../../shared/const/default.model";
 import {GameResponseObject} from "../dto/games.dto";
+import {Types} from "mongoose";
 
 @Schema(DEFAULT_SCHEMA_OPTIONS)
 export class Game extends DefaultModel {
@@ -25,6 +26,12 @@ export class Game extends DefaultModel {
     })
     releaseDate: Date;
 
+    @Prop({
+        type: [Types.ObjectId],
+        ref: "Episode"
+    })
+    episodes: Types.ObjectId[];
+
     toResponseObject: () => GameResponseObject;
 }
 
@@ -35,7 +42,7 @@ GameSchema.methods = {
      * Mapping function that transforms a model into a correct Response Object
      */
     toResponseObject: function(): GameResponseObject {
-        const {_id, name, _createdAt, _updatedAt, cover, screenshot, releaseDate} = this;
+        const {_id, name, _createdAt, _updatedAt, cover, screenshot, releaseDate, episodes} = this;
         return {
             _id,
             _createdAt,
@@ -43,7 +50,8 @@ GameSchema.methods = {
             name,
             cover,
             screenshot,
-            releaseDate
+            releaseDate,
+            episodes
         }
     }
 };

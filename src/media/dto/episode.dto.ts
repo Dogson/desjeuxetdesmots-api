@@ -1,4 +1,5 @@
 import {IsString, IsOptional, IsUrl, IsDateString} from "class-validator";
+import {Types} from "mongoose";
 
 /**
  * Request object format used in POSTing a new episode
@@ -49,4 +50,5 @@ export class EpisodeResponseObject {
     readonly description: string;
     readonly url: string;
     readonly releaseDate: Date;
+    readonly games: Types.ObjectId[];
 }
