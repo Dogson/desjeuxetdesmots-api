@@ -13,6 +13,9 @@ export class CreateGameDto {
     readonly screenshot: string;
     @IsDateString()
     readonly releaseDate: Date;
+    readonly episodes: Types.ObjectId[];
+    @IsString()
+    readonly igdbId: string;
 }
 
 /**
@@ -45,4 +48,5 @@ export class GameResponseObject {
     readonly screenshot: string;
     readonly releaseDate: Date;
     readonly episodes: Types.ObjectId[];
+    readonly igdbId: string;
 }

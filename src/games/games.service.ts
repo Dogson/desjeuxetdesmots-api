@@ -1,4 +1,9 @@
-import {HttpException, Injectable, NotFoundException} from "@nestjs/common";
+import {
+    HttpException,
+    Injectable,
+    InternalServerErrorException, Logger,
+    NotFoundException
+} from "@nestjs/common";
 
 import {CreateGameDto, GameResponseObject, UpdateGameDto} from "./dto/games.dto";
 import {InjectModel} from "@nestjs/mongoose";
@@ -9,7 +14,9 @@ import {ERROR_TYPES} from "../shared/const/error.types";
 import {Model} from "mongoose";
 
 @Injectable()
-export class GamesService  {
+export class GamesService {
+    private logger = new Logger('GamesService');
+
     constructor(
         @InjectModel('Game') private readonly gameModel: Model<Game>
     ) {
@@ -20,9 +27,19 @@ export class GamesService  {
      * @param createGameDto
      */
     async create(createGameDto: CreateGameDto): Promise<GameResponseObject> {
-        const newGame = new this.gameModel(createGameDto);
-        const result = await newGame.save();
-        return result.toResponseObject();
+        try {
+            const newGame = new this.gameModel(createGameDto);
+            const result = await newGame.save();
+            return result.toResponseObject();
+        } catch (err) {
+            if (err && err.code === 11000) {
+                this.logger.log(`Skipped game insertion ${createGameDto.name}: game alredy exists`);
+            }
+            if (err && err.error) {
+                throw err;
+            }
+            throw new InternalServerErrorException(ERROR_TYPES.wrong_rss_format(err))
+        }
     }
 
     /**

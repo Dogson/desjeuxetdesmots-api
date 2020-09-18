@@ -11,6 +11,7 @@ import { UsersModule } from './users/users.module';
 import { ConfigModule } from '@nestjs/config';
 import { MediaModule } from './media/media.module';
 import dotenv = require('dotenv');
+import {EpisodesModule} from "./episodes/episodes.module";
 
 mongoose.set('useFindAndModify', false);
 mongoose.set('runValidators', true);
@@ -19,10 +20,11 @@ dotenv.config({path: "../.env.local"});
 @Module({
     imports: [
         ConfigModule.forRoot({isGlobal: true}),
-        GamesModule,
         MongooseModule.forRoot(process.env.CONNECTION_STRING),
-        UsersModule,
-        MediaModule
+        GamesModule,
+        EpisodesModule,
+        MediaModule,
+        UsersModule
     ],
     controllers: [
         AppController

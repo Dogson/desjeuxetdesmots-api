@@ -2,7 +2,15 @@ import {Prop, Schema, SchemaFactory} from '@nestjs/mongoose';
 import {DEFAULT_SCHEMA_OPTIONS} from "../../shared/const/schema.options";
 import {DefaultModel} from "../../shared/const/default.model";
 import {MediaResponseObject} from "../dto/media.dto";
-import {Episode, EpisodeSchema} from "./episode.model";
+import {Episode, EpisodeSchema} from "../../episodes/model/episodes.model";
+
+export interface MediaConfig {
+    excludeStrings: string[],
+    excludeRegex: RegExp[],
+    ignoreEpisode: string[],
+    endOfParseStrings: string[],
+    parseProperty: string
+}
 
 @Schema(DEFAULT_SCHEMA_OPTIONS)
 export class Media extends DefaultModel {
@@ -28,10 +36,12 @@ export class Media extends DefaultModel {
     feedUrl: string;
 
     @Prop({
-        type: [EpisodeSchema],
-        required: false
+        type: [EpisodeSchema]
     })
     episodes: Episode[];
+
+    @Prop()
+    config: MediaConfig;
 
     toResponseObject: () => MediaResponseObject;
 }

@@ -11,8 +11,8 @@ import {InjectModel} from "@nestjs/mongoose";
 import {Media} from "./model/media.model";
 import {isObjectId} from "../shared/utils/utils";
 import {ERROR_TYPES} from "../shared/const/error.types";
-import {Model} from "mongoose";
 import {parseRssMedia} from "./helpers/rss.parser";
+import {Model} from "mongoose";
 
 @Injectable()
 export class MediaService {
@@ -24,9 +24,9 @@ export class MediaService {
     /**
      * Create a media and generate all episodes from a RSS feed URL
      */
-    async generateMediaAndEpisode(feedUrl): Promise<MediaResponseObject> {
+    async generateMediaAndEpisode(feedUrl, config): Promise<MediaResponseObject> {
         try {
-            const generatedMedia = await parseRssMedia(feedUrl);
+            const generatedMedia = await parseRssMedia(feedUrl, config);
             const newMedia = new this.mediaModel(generatedMedia);
             const result = await newMedia.save();
             return result.toResponseObject();
@@ -54,9 +54,11 @@ export class MediaService {
         } catch (err) {
             if (err && err.code === 11000) {
                 throw new ForbiddenException(ERROR_TYPES.duplicate_key(JSON.stringify(err.keyValue)));
-            } else {
+            }
+            if (err && err.error) {
                 throw err;
             }
+            throw new InternalServerErrorException(ERROR_TYPES.wrong_rss_format(err))
         }
     }
 

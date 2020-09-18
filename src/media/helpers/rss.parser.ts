@@ -1,8 +1,9 @@
 import Parser = require("rss-parser");
 import _ = require("lodash");
 import * as moment from 'moment';
-import {CreateEpisodeDto} from "../dto/episode.dto";
+import {CreateEpisodeDto} from "../../episodes/dto/episodes.dto";
 import {CreateMediaDto} from "../dto/media.dto";
+import {MediaConfig} from "../model/media.model";
 
 
 const EPISODE_URL_TYPES = {
@@ -13,8 +14,9 @@ const EPISODE_URL_TYPES = {
 /**
  * Return a media with a list of episodes parsed from a RSS feed
  * @param feedUrl
+ * @param config
  */
-export async function parseRssMedia(feedUrl: string): Promise<CreateMediaDto> {
+export async function parseRssMedia(feedUrl: string, config: MediaConfig): Promise<CreateMediaDto> {
     const parser = new Parser();
     const feed = await parser.parseURL(feedUrl);
 
@@ -33,8 +35,9 @@ export async function parseRssMedia(feedUrl: string): Promise<CreateMediaDto> {
         name: feed.title,
         logo: feed.image.url,
         description: generateMediaDescription(feed.description, feedUrl),
-        feedUrl: feedUrl,
-        episodes: episodes
+        feedUrl,
+        episodes,
+        config
     };
 }
 

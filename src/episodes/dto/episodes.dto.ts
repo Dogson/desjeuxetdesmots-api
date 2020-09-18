@@ -35,7 +35,9 @@ export class UpdateEpisodeDto {
     readonly embeddedUrl: string;
     @IsDateString()
     @IsOptional()
-    readonly releaseDate: Date
+    readonly releaseDate: Date;
+    @IsOptional()
+    readonly games: Types.ObjectId[];
 }
 
 /**

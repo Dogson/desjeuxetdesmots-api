@@ -1,6 +1,6 @@
 import {Body, Controller, Delete, Get, Logger, Param, Post, Put, Query, UsePipes} from '@nestjs/common';
 import {MediaService} from "./media.service";
-import {CreateMediaDto, MediaResponseObject, UpdateMediaDto} from "./dto/media.dto";
+import {CreateMediaDto, GenerateMediaDto, MediaResponseObject, UpdateMediaDto} from "./dto/media.dto";
 import {ValidationPipe} from "../shared/handler/validation.pipe";
 import {DEFAULT_MEDIA_QUERY, MediaQuery} from "./query/media.query";
 
@@ -17,8 +17,9 @@ export class MediaController {
      */
     @Post('generate')
     @UsePipes(new ValidationPipe())
-    async generateMedia(@Body("feedUrl") feedUrl: string): Promise<MediaResponseObject> {
-        return this.mediaService.generateMediaAndEpisode(feedUrl);
+    async generateMedia(@Body() generateMediaDto: GenerateMediaDto): Promise<MediaResponseObject> {
+        const {config, feedUrl} = generateMediaDto;
+        return this.mediaService.generateMediaAndEpisode(feedUrl, config);
     }
 
     /**

@@ -1,7 +1,7 @@
 import {Prop, Schema, SchemaFactory} from '@nestjs/mongoose';
 import {DEFAULT_SCHEMA_OPTIONS} from "../../shared/const/schema.options";
 import {DefaultModel} from "../../shared/const/default.model";
-import {EpisodeResponseObject} from "../dto/episode.dto";
+import {EpisodeResponseObject} from "../dto/episodes.dto";
 import {Types} from "mongoose";
 
 @Schema(DEFAULT_SCHEMA_OPTIONS)
@@ -52,6 +52,11 @@ export class Episode extends DefaultModel {
 
 const EpisodeSchema = SchemaFactory.createForClass(Episode);
 
+// EpisodeSchema.post('save', function () {
+//         const episode: Episode = this;
+//     }
+// );
+
 EpisodeSchema.methods = {
     /**
      * Mapping function that transforms a model into a correct Response Object
@@ -72,5 +77,6 @@ EpisodeSchema.methods = {
         }
     }
 };
+
 
 export {EpisodeSchema};

@@ -11,7 +11,8 @@ import {GameSchema} from "./model/games.model";
         MongooseModule.forFeature([{ name: 'Game', schema: GameSchema }]),
     ],
     controllers: [GamesController],
-    providers: [GamesService]
+    providers: [GamesService],
+    exports: [MongooseModule]
 })
 
 export class GamesModule {
