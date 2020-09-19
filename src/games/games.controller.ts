@@ -1,7 +1,9 @@
-import {Body, Controller, Delete, Get, Logger, Param, Post, Put, UsePipes} from '@nestjs/common';
+import {Body, Controller, Delete, Get, Logger, Param, Post, Put, Query, UsePipes} from '@nestjs/common';
 import {GamesService} from "./games.service";
 import {CreateGameDto, GameResponseObject, UpdateGameDto} from "./dto/games.dto";
 import {ValidationPipe} from "../shared/handler/validation.pipe";
+import {DEFAULT_GAME_QUERY, GameQuery} from "./query/games.query";
+import {_parseDefaultQueryTypes} from "../shared/const/default.query";
 
 @Controller('games')
 export class GamesController {
@@ -38,8 +40,10 @@ export class GamesController {
      * GET /games
      */
     @Get()
-    async findAllGames(): Promise<GameResponseObject[]> {
-        return this.gamesService.findAll();
+    async findAllGames(@Query() query: GameQuery): Promise<GameResponseObject[]> {
+        query = this._mapQueryWithDefault(query);
+        query = this._parseQueryTypes(query);
+        return this.gamesService.findAll(query);
     }
 
     /**
@@ -59,5 +63,18 @@ export class GamesController {
     async deleteGame(@Param('id') id: string): Promise<any> {
         await this.gamesService.delete(id);
         return null;
+    }
+
+    private _mapQueryWithDefault(query: GameQuery): GameQuery {
+        return {
+            ...DEFAULT_GAME_QUERY,
+            ...query
+        }
+    }
+
+    private _parseQueryTypes(query: GameQuery): GameQuery {
+        return {
+            ..._parseDefaultQueryTypes(query)
+        }
     }
 }

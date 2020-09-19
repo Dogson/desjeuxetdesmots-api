@@ -58,7 +58,11 @@ function generateMediaDescription(description, feedUrl): string {
         return description;
     }
     if (feedUrl && feedUrl.indexOf("acast") > -1) {
-        return strip_html_tags(description).substring(0, strip_html_tags(description).indexOf('Voir Acast'))
+        let strippedDesc = strip_html_tags(description);
+        if (strippedDesc.indexOf("Voir Acast") > -1) {
+            strippedDesc = strippedDesc.substring(0, strip_html_tags(description).indexOf('Voir Acast'))
+        }
+        return strippedDesc;
     }
 }
 

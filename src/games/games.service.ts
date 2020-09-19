@@ -17,6 +17,7 @@ import {ERROR_TYPES} from "../shared/const/error.types";
 import {Model, Types} from "mongoose";
 import {EpisodesService} from "../episodes/episodes.service";
 import {MediaService} from "../media/media.service";
+import {GameQuery} from "./query/games.query";
 
 @Injectable()
 export class GamesService {
@@ -79,8 +80,13 @@ export class GamesService {
     /**
      * Find all games
      */
-    async findAll(): Promise<GameResponseObject[]> {
-        const gameResults: Game[] = await this.gameModel.find().exec();
+    async findAll(query: GameQuery): Promise<GameResponseObject[]> {
+        const {page, limit} = query;
+        const gameResults: Game[] = await this.gameModel.find()
+            .sort({_updatedAt: -1})
+            .skip((page - 1) * limit)
+            .limit(limit)
+            .exec();
         await asyncForEach(gameResults, async (gameResult) => {
             const episodesId = gameResult.episodes;
             gameResult.medias = await this.mediaService.findByEpisodes(episodesId, false);
