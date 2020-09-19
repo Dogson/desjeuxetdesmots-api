@@ -13,23 +13,26 @@ import {isObjectId} from "../shared/utils/utils";
 import {ERROR_TYPES} from "../shared/const/error.types";
 import {parseRssMedia} from "./helpers/rss.parser";
 import {Model} from "mongoose";
+import {EpisodesService} from "../episodes/episodes.service";
 
 @Injectable()
 export class MediaService {
     constructor(
-        @InjectModel('Media') private readonly mediaModel: Model<Media>
+        @InjectModel('Media') private readonly mediaModel: Model<Media>,
+        private readonly episodesService: EpisodesService
     ) {
     }
 
     /**
      * Create a media and generate all episodes from a RSS feed URL
      */
-    async generateMediaAndEpisode(feedUrl, config): Promise<MediaResponseObject> {
+    async generateMediaAndEpisode(feedUrl, config) {
         try {
             const generatedMedia = await parseRssMedia(feedUrl, config);
             const newMedia = new this.mediaModel(generatedMedia);
             const result = await newMedia.save();
-            return result.toResponseObject();
+            this.episodesService.generateGamesForAllEpisodes(result);
+            return result;
         } catch (err) {
             if (err && err.code === 11000) {
                 throw new ForbiddenException(ERROR_TYPES.duplicate_key(JSON.stringify(err.keyValue)));
@@ -47,14 +50,16 @@ export class MediaService {
      * @param createMediaDto
      */
     async create(createMediaDto: CreateMediaDto): Promise<MediaResponseObject> {
+        const existingMedia = await this.findByName(createMediaDto.name);
+        if (existingMedia) {
+            throw new ForbiddenException(ERROR_TYPES.duplicate_key(`name: ${createMediaDto.name}`))
+        }
         try {
             const newMedia = new this.mediaModel(createMediaDto);
             const result = await newMedia.save();
+            await this.episodesService.generateGamesForAllEpisodes(result);
             return result.toResponseObject();
         } catch (err) {
-            if (err && err.code === 11000) {
-                throw new ForbiddenException(ERROR_TYPES.duplicate_key(JSON.stringify(err.keyValue)));
-            }
             if (err && err.error) {
                 throw err;
             }
@@ -98,6 +103,16 @@ export class MediaService {
     async findOne(id: string): Promise<MediaResponseObject> {
         const media = await this._find(id);
         return media.toResponseObject();
+    }
+
+    async findByName(name: string): Promise<Media> {
+        let media;
+        try {
+            media = await this.mediaModel.findOne({name}).exec();
+        } catch (error) {
+            throw new HttpException(error.message, error.status);
+        }
+        return media;
     }
 
     /**

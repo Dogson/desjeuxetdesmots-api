@@ -1,4 +1,5 @@
 import {
+    ForbiddenException,
     HttpException,
     Injectable,
     InternalServerErrorException, Logger,
@@ -11,7 +12,7 @@ import {InjectModel} from "@nestjs/mongoose";
 import {Game} from "./model/games.model";
 import {isObjectId} from "../shared/utils/utils";
 import {ERROR_TYPES} from "../shared/const/error.types";
-import {Model} from "mongoose";
+import {Model, Types} from "mongoose";
 
 @Injectable()
 export class GamesService {
@@ -33,7 +34,7 @@ export class GamesService {
             return result.toResponseObject();
         } catch (err) {
             if (err && err.code === 11000) {
-                this.logger.log(`Skipped game insertion ${createGameDto.name}: game alredy exists`);
+                throw new ForbiddenException(ERROR_TYPES.duplicate_key(JSON.stringify(err.keyValue)))
             }
             if (err && err.error) {
                 throw err;
@@ -53,6 +54,24 @@ export class GamesService {
         return result.toResponseObject();
     }
 
+    async pushEpisodesToGame(id: string, episodeId: string) {
+        if (!isObjectId(id)) {
+            throw new NotFoundException(ERROR_TYPES.not_found("game"));
+        }
+        if (!isObjectId(episodeId)) {
+            throw new NotFoundException(ERROR_TYPES.not_found("episode"));
+        }
+
+        const game = await this.gameModel.updateOne(
+            {_id: id},
+            {$push: {'episodes': Types.ObjectId(episodeId)}},
+        );
+
+        if (!game) {
+            throw new NotFoundException(ERROR_TYPES.not_found("game"));
+        }
+    }
+
     /**
      * Find all games
      */
@@ -66,7 +85,7 @@ export class GamesService {
      * @param id
      */
     async findOne(id: string): Promise<GameResponseObject> {
-        const game = await this._find(id);
+        const game = await this._findById(id);
         return game.toResponseObject();
     }
 
@@ -84,7 +103,17 @@ export class GamesService {
         }
     }
 
-    private async _find(id: string): Promise<Game> {
+    async findByIgdbId(igdbId: string): Promise<Game> {
+        let game;
+        try {
+            game = await this.gameModel.findOne({igdbId}).exec();
+            return game;
+        } catch (error) {
+            throw new HttpException(error.message, error.status);
+        }
+    }
+
+    private async _findById(id: string): Promise<Game> {
         if (!isObjectId(id)) {
             throw new NotFoundException(ERROR_TYPES.not_found("game"));
         }
@@ -99,6 +128,7 @@ export class GamesService {
         }
         return game;
     }
+
 
     private async _findAndUpdate(id: string, updateGameDto: UpdateGameDto): Promise<Game> {
         if (!isObjectId(id)) {

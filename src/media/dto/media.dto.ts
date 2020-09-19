@@ -49,7 +49,7 @@ export class MediaResponseObject {
     readonly logo: string;
     readonly description: string;
     readonly feedUrl: string;
-    readonly episodes: EpisodeResponseObject[];
+    episodes: EpisodeResponseObject[];
 }
 
 

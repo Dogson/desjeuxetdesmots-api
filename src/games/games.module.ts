@@ -12,7 +12,10 @@ import {GameSchema} from "./model/games.model";
     ],
     controllers: [GamesController],
     providers: [GamesService],
-    exports: [MongooseModule]
+    exports: [
+        MongooseModule,
+        GamesService
+    ]
 })
 
 export class GamesModule {

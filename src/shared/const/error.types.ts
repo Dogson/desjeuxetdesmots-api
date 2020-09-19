@@ -8,8 +8,8 @@ export const ERROR_TYPES = {
         message: "Invalid username/password."
     },
     invalid_auth: {
-      error: "invalid_auth",
-      message: "Invalid Authorization header"
+        error: "invalid_auth",
+        message: "Invalid Authorization header"
     },
     token_error: (errorStack) => {
         return {
@@ -24,8 +24,8 @@ export const ERROR_TYPES = {
         }
     },
     user_already_exists: {
-      error: "user_already_exists",
-      message: "User already exists"
+        error: "user_already_exists",
+        message: "User already exists"
     },
     validation_no_body: {
         error: "validation_no_body",
@@ -53,6 +53,18 @@ export const ERROR_TYPES = {
         return {
             error: "wrong_rss_format",
             message: `This error occured during the parsing of the RSS feed: ${err}`
+        }
+    },
+    unable_to_parse_games: (err) => {
+        return {
+            error: "unable_to_parse_games",
+            message: `Unable to parse / fetch games: ${err}`
+        }
+    },
+    unable_to_connect_to_igdb: (err) => {
+        return {
+            error: "unable_to_connect_to_igdb",
+            message: `Unable to connect to the IGDB API : ${err}`
         }
     }
 };

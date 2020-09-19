@@ -17,7 +17,7 @@ export class MediaController {
      */
     @Post('generate')
     @UsePipes(new ValidationPipe())
-    async generateMedia(@Body() generateMediaDto: GenerateMediaDto): Promise<MediaResponseObject> {
+    async generateMedia(@Body() generateMediaDto: GenerateMediaDto) {
         const {config, feedUrl} = generateMediaDto;
         return this.mediaService.generateMediaAndEpisode(feedUrl, config);
     }
@@ -74,9 +74,9 @@ export class MediaController {
     }
 
     private _mapQueryWithDefault(query) {
-       return {
-           ...DEFAULT_MEDIA_QUERY,
-           ...query
-       }
+        return {
+            ...DEFAULT_MEDIA_QUERY,
+            ...query
+        }
     }
 }

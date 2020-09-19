@@ -1,35 +1,113 @@
 import {
-    Injectable, Logger
+    ForbiddenException,
+    Injectable, InternalServerErrorException, Logger
 } from "@nestjs/common";
-import {MediaConfig} from "../media/model/media.model";
-import {CreateGameDto} from "../games/dto/games.dto";
+import {Media, MediaConfig} from "../media/model/media.model";
+import {CreateGameDto, GameResponseObject} from "../games/dto/games.dto";
 import axios from "axios";
 import {InjectModel} from "@nestjs/mongoose";
 import {Model} from "mongoose";
 import {Game} from "../games/model/games.model";
+import {GamesService} from "../games/games.service";
+import {ERROR_TYPES} from "../shared/const/error.types";
+import {asyncForEach} from "../shared/utils/utils";
+import {Episode} from "../episodes/model/episodes.model";
 
 @Injectable()
 export class GameGenerationService {
-    private logger = new Logger('EpisodesService');
+    private logger = new Logger('GameGenerationService');
 
     constructor(
-        @InjectModel('Game') private readonly gameModel: Model<Game>
+        @InjectModel('Game') private readonly gameModel: Model<Game>,
+        private readonly gamesService: GamesService,
     ) {
     }
 
-    public async fetchAndPopulateGames(episode) {
-            console.log("todo")
+    /**
+     * For a given episode, fetch and populate related games and update episode with said games
+     * @param media
+     * @param episode
+     */
+    public async fetchAndPopulateGames(media: Media, episode: Episode) {
+        this.logger.log(`Starting populating game for episode : ${episode.name}`);
+        const mediaConfig: MediaConfig = media.config;
+        const stringToParse = episode[mediaConfig.parseProperty];
+        try {
+            const games = await this._getVideoGamesFromString(stringToParse, mediaConfig);
+            return await this.createAndUpdateGamesAndEpisode(media, games, episode);
+
+        } catch (err) {
+            throw new InternalServerErrorException(ERROR_TYPES.unable_to_parse_games(err))
+        }
     }
 
-    public async addGameEpisode(gameId: string, episodeId: string) {
-        console.log("addgameepisode");
+    async createAndUpdateGamesAndEpisode(media, games: CreateGameDto[], episode) {
+        try {
+            const gamesCreated = [];
+            await asyncForEach(games, async (game) => {
+                gamesCreated.push(await this.createGameIfNotExists(game));
+            });
+
+            await asyncForEach(gamesCreated, async (game: GameResponseObject) => {
+                await this.addEpisodeToGame(game._id, episode._id);
+            });
+
+            const gamesId = gamesCreated.map(game => game._id);
+            return await this.addGamesToEpisode(media, episode, gamesId);
+        } catch (err) {
+            this.logger.error(err)
+        }
     }
 
+    public async createGameIfNotExists(game: CreateGameDto): Promise<GameResponseObject> {
+        const existingGame = await this.gamesService.findByIgdbId(game.igdbId);
+        if (existingGame) {
+            this.logger.log(`Skipped creation for game ${existingGame.name} : game already exists`);
+            return existingGame.toResponseObject();
+        }
+
+        return await this.gamesService.create(game);
+    }
+
+    /**
+     * Add episode to array of episodes in the game doc
+     * @param gameId
+     * @param episodeId
+     */
+    public async addEpisodeToGame(gameId: string, episodeId: string) {
+        await this.gamesService.pushEpisodesToGame(gameId, episodeId);
+    }
+
+    /**
+     * Add games ids array to episode
+     * @param media
+     * @param episode
+     * @param gamesId
+     */
+    public async addGamesToEpisode(media, episode, gamesId: string[]) {
+
+        const episodeIndex = media.episodes.map((ep) => ep._id).indexOf(episode._id);
+        gamesId.forEach((gameId) => {
+            if (episode.games.indexOf(gameId) === -1) {
+                media.episodes[episodeIndex].games.push(gameId)
+            }
+        });
+        media.episodes[episodeIndex].generatedGames = true;
+        this.logger.log(`Episode ${episode.name} has generated ${gamesId.length} games.`);
+        await media.save();
+    }
+
+    /**
+     * Get a list of games from a string
+     * @param str
+     * @param mediaConfig
+     * @private
+     */
     private async _getVideoGamesFromString(str: string, mediaConfig: MediaConfig): Promise<CreateGameDto[]> {
         let games: CreateGameDto[] = [];
         let ignoreEpisode = false;
-        mediaConfig.ignoreEpisode.forEach((str) => {
-            if (str.indexOf(str) > -1) {
+        mediaConfig.ignoreEpisode.forEach((ignoreStr) => {
+            if (str.indexOf(ignoreStr) > -1) {
                 ignoreEpisode = true;
             }
         });
@@ -42,6 +120,11 @@ export class GameGenerationService {
         return games;
     }
 
+    /**
+     * Get a list of games from an array of words
+     * @param words
+     * @private
+     */
     private async _getGamesFromArray(words: string[]): Promise<CreateGameDto[]> {
         const resultGames: CreateGameDto[] = [];
         for (let i = 0; i < words.length; i++) {
@@ -83,42 +166,57 @@ export class GameGenerationService {
         return resultGames;
     };
 
+    /**
+     * Return an IGDB game if the string match any of the string in the matchingGames array
+     * @param str
+     * @param matchingGames
+     * @private
+     */
     _getExactMatchingGame(str: string, matchingGames: any[]): any {
         return matchingGames.find((game) => game.name.toUpperCase() === str.toUpperCase())
     };
 
-// Looks for string occurences in matchingGames
-// If matchingGames is not set, looks for string occurences in API Call
+    /**
+     * Looks for string occurence in matching games
+     * If matchingGames is null, looks for string occurences in IGDB API
+     * @param str
+     * @param matchingGames
+     * @private
+     */
     async _getAllPartiallyMatchingGames(str: string, matchingGames: any[]): Promise<CreateGameDto[]> {
-        const proxyUrl = process.env.PROXY_URL;
         const igdbKey = process.env.IGDB_API_KEY;
         const igdbUrl = process.env.IGDB_API_URL;
         const endpointName = process.env.IGDB_API_GAMES_ENDPOINTS;
-        const url = `${proxyUrl}${igdbUrl}${endpointName}`;
-
+        const url = `${igdbUrl}${endpointName}`;
         if (matchingGames) {
             return matchingGames.filter((game) => {
                 return game.name.toUpperCase().indexOf(str.toUpperCase() + " ") === 0 || game.name.toUpperCase() === str.toUpperCase();
             })
         } else {
-            // debugger;
-            return axios({
-                url: url,
-                method: 'POST',
-                headers: {
-                    'Accept': 'application/json',
-                    'user-key': igdbKey,
-                    "X-Requested-With": "XMLHttpRequest"
-                },
-                data: `fields name, cover.url, screenshots.url, release_dates.date; sort popularity desc; where themes!= (42) & name~"${str}"* & popularity > 1; limit 50;`
-            })
-                .then((response) => {
-                    return response.data.length === 0 ? [] : this._mappedGames(response.data);
-                })
+            try {
+                const response = await axios({
+                    url: url,
+                    method: 'POST',
+                    headers: {
+                        'Accept': 'application/json',
+                        'user-key': igdbKey,
+                        "X-Requested-With": "XMLHttpRequest"
+                    },
+                    data: `fields name, cover.url, screenshots.url, release_dates.date; sort popularity desc; where themes!= (42) & name~"${str}"* & popularity > 1; limit 50;`
+                });
+                return response.data.length === 0 ? [] : this._mappedGames(response.data);
+            } catch (err) {
+                throw new ForbiddenException(ERROR_TYPES.unable_to_connect_to_igdb(err))
+            }
         }
     }
 
-    private _mappedGames(games) {
+    /**
+     * Map IGDB games to CreateGameDTO
+     * @param games
+     * @private
+     */
+    private _mappedGames(games): CreateGameDto[] {
         return games
             .filter((game) => {
                 return game.release_dates && game.cover && game.screenshots;
@@ -126,22 +224,30 @@ export class GameGenerationService {
             .map((game) => {
                 const result = {
                     ...game,
+                    igdbId: game.id,
                     cover: game.cover && game.cover.url.replace('/t_thumb/', '/t_cover_big/').replace('//', 'https://'),
                     screenshot: game.screenshots && game.screenshots.length && game.screenshots[game.screenshots.length - 1].url.replace('/t_thumb/', '/t_screenshot_big/').replace('//', 'https://'),
-                    releaseDate: game.release_dates && Math.min(...game.release_dates && game.release_dates.map((release_date) => {
+                    releaseDate: game.release_dates && new Date(Math.min(...game.release_dates && game.release_dates.map((release_date) => {
                             return release_date.date;
                         })
                             .filter((date) => {
                                 return date != null;
                             })
-                    )
+                    ) * 1000)
                 };
                 delete result.release_dates;
                 delete result.screenshots;
+                delete game.id;
                 return result;
             })
     }
 
+    /**
+     * Parse description containing games to remove all useless strings and chars
+     * @param str
+     * @param mediaConfig
+     * @private
+     */
     private _parseDescription(str, mediaConfig) {
         str = str.toUpperCase();
         let parsed = this._removeExcludedRegex(str, mediaConfig);
@@ -153,6 +259,12 @@ export class GameGenerationService {
         return parsed;
     };
 
+    /**
+     * Remove excluded strings
+     * @param str
+     * @param mediaConfig
+     * @private
+     */
     private _removedExcludedStrings(str, mediaConfig) {
         let result = str;
         mediaConfig.excludeStrings.forEach((string) => {
@@ -162,7 +274,12 @@ export class GameGenerationService {
         return result;
     };
 
-
+    /**
+     * Remove strings containing regex
+     * @param str
+     * @param mediaConfig
+     * @private
+     */
     private _removeExcludedRegex(str, mediaConfig) {
         let result = str;
         mediaConfig.excludeRegex.forEach((regex) => {
@@ -172,6 +289,12 @@ export class GameGenerationService {
         return result;
     };
 
+    /**
+     * Remove all string after "endOfParse" strings
+     * @param str
+     * @param mediaConfig
+     * @private
+     */
     private _removeEndOfParse(str, mediaConfig) {
         let result = str;
         mediaConfig.endOfParseStrings.forEach((endOfParse) => {
@@ -183,10 +306,20 @@ export class GameGenerationService {
         return result;
     };
 
+    /**
+     * Remove all special characters
+     * @param str
+     * @private
+     */
     private _removeSpecialCharacters(str) {
         return str.replace(/[`~!@#$%^&*()_|+=?;«»'",.<>{}\[\]\\\/]/gi, '');
     };
 
+    /**
+     * Remove useless white spaces
+     * @param str
+     * @private
+     */
     private _removeUselessWhiteSpaces(str) {
         return str.replace(/\s+(\W)/g, "$1");
     }

@@ -24,7 +24,7 @@ export class Episode extends DefaultModel {
     @Prop({
         required: true,
     })
-    embeddedUrl: string;
+    fileUrl: string;
 
     @Prop({
         required: true
@@ -40,7 +40,7 @@ export class Episode extends DefaultModel {
     @Prop({
         default: false
     })
-    isVerified: boolean;
+    verified: boolean;
 
     @Prop({
         default: false
@@ -52,17 +52,12 @@ export class Episode extends DefaultModel {
 
 const EpisodeSchema = SchemaFactory.createForClass(Episode);
 
-// EpisodeSchema.post('save', function () {
-//         const episode: Episode = this;
-//     }
-// );
-
 EpisodeSchema.methods = {
     /**
      * Mapping function that transforms a model into a correct Response Object
      */
     toResponseObject: function (): EpisodeResponseObject {
-        const {_id, name, _createdAt, _updatedAt, image, description, embeddedUrl, releaseDate, games, isVerified} = this;
+        const {_id, name, _createdAt, _updatedAt, image, description, fileUrl, releaseDate, games, verified} = this;
         return {
             _id,
             _createdAt,
@@ -70,10 +65,10 @@ EpisodeSchema.methods = {
             name,
             image,
             description,
-            embeddedUrl,
+            fileUrl,
             releaseDate,
             games,
-            isVerified
+            verified
         }
     }
 };

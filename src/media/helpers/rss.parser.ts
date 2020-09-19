@@ -5,12 +5,6 @@ import {CreateEpisodeDto} from "../../episodes/dto/episodes.dto";
 import {CreateMediaDto} from "../dto/media.dto";
 import {MediaConfig} from "../model/media.model";
 
-
-const EPISODE_URL_TYPES = {
-    soundcloud: "https://w.soundcloud.com/player/?url=https%3A//api.soundcloud.com/tracks/::id",
-    acast: "https://player.acast.com/5b7ac427c6a58e726f576cff/episodes/::id"
-};
-
 /**
  * Return a media with a list of episodes parsed from a RSS feed
  * @param feedUrl
@@ -26,7 +20,7 @@ export async function parseRssMedia(feedUrl: string, config: MediaConfig): Promi
             image: entry.itunes.image,
             description: generateEpisodeDescription(entry.itunes.summary, feedUrl),
             releaseDate: moment(entry.pubDate).toDate(),
-            embeddedUrl: generateEpisodeUrl(entry.guid, feedUrl)
+            fileUrl: entry.enclosure.url
         };
     })
         .filter(filterEpisodes);
@@ -46,11 +40,11 @@ export async function parseRssMedia(feedUrl: string, config: MediaConfig): Promi
  * @param episode
  */
 function filterEpisodes(episode: CreateEpisodeDto): boolean {
-    if (!episode.embeddedUrl) {
+    if (!episode.fileUrl) {
         return false;
     }
-    if (episode.embeddedUrl.indexOf("acast") > -1)
-        return episode.embeddedUrl.indexOf("djpod") === -1;
+    if (episode.fileUrl.indexOf("acast") > -1)
+        return episode.fileUrl.indexOf("djpod") === -1;
     return true;
 }
 
@@ -76,21 +70,6 @@ function generateMediaDescription(description, feedUrl): string {
 function generateEpisodeDescription(description, feedUrl): string {
     if (feedUrl && (feedUrl.indexOf("soundcloud") > -1 || feedUrl.indexOf("acast") > -1)) {
         return generateMediaDescription(description, feedUrl);
-    }
-}
-
-/**
- * Generate the correct episode embbeded url given the format of the RSS field
- * @param guid
- * @param feedUrl
- */
-function generateEpisodeUrl(guid: string, feedUrl: string): string {
-    if (feedUrl && feedUrl.indexOf("soundcloud") > -1) {
-        const id = guid.substring(guid.indexOf('tracks/') + 1).replace('racks/', '');
-        return EPISODE_URL_TYPES.soundcloud.replace('::id', id)
-    }
-    if (feedUrl && feedUrl.indexOf("acast") > -1) {
-        return EPISODE_URL_TYPES.acast.replace('::id', guid);
     }
 }
 

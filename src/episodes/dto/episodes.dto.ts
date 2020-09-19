@@ -12,7 +12,7 @@ export class CreateEpisodeDto {
     @IsString()
     readonly description: string;
     @IsUrl()
-    readonly embeddedUrl: string;
+    readonly fileUrl: string;
     @IsDateString()
     readonly releaseDate: Date;
 }
@@ -32,7 +32,7 @@ export class UpdateEpisodeDto {
     readonly description: string;
     @IsUrl()
     @IsOptional()
-    readonly embeddedUrl: string;
+    readonly fileUrl: string;
     @IsDateString()
     @IsOptional()
     readonly releaseDate: Date;
@@ -50,8 +50,8 @@ export class EpisodeResponseObject {
     readonly name: string;
     readonly image: string;
     readonly description: string;
-    readonly embeddedUrl: string;
+    readonly fileUrl: string;
     readonly releaseDate: Date;
     readonly games: Types.ObjectId[];
-    readonly isVerified: boolean;
+    readonly verified: boolean;
 }
