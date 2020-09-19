@@ -97,6 +97,21 @@ export class MediaService {
     }
 
     /**
+     * Find all medias corresponding to given episodesId
+     * @param episodeIds
+     * @param withEpisodes
+     */
+    async findByEpisodes(episodeIds: string[], withEpisodes: boolean): Promise<MediaResponseObject[]> {
+        const projection = withEpisodes ? {} : {episodes: 0};
+        const medias = await this.mediaModel.find(
+            {}, projection
+        ).elemMatch("episodes",
+            {_id: {$in: episodeIds}}
+        ).exec();
+        return medias.map((media) => media.toResponseObject());
+    }
+
+    /**
      * Find media by id
      * @param id
      */

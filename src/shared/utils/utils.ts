@@ -16,3 +16,9 @@ export async function asyncForEach(array, callback) {
         await callback(array[index], index, array);
     }
 }
+
+export async function asyncMap(array, callback) {
+    for (let index = 0; index < array.length; index++) {
+        array[index] = callback(array[index], index, array);
+    }
+}

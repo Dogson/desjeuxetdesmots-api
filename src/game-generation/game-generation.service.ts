@@ -1,5 +1,5 @@
 import {
-    ForbiddenException,
+    ForbiddenException, forwardRef, Inject,
     Injectable, InternalServerErrorException, Logger
 } from "@nestjs/common";
 import {Media, MediaConfig} from "../media/model/media.model";
@@ -19,7 +19,7 @@ export class GameGenerationService {
 
     constructor(
         @InjectModel('Game') private readonly gameModel: Model<Game>,
-        private readonly gamesService: GamesService,
+        @Inject(forwardRef(() => GamesService)) private readonly gamesService: GamesService
     ) {
     }
 

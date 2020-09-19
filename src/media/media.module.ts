@@ -16,7 +16,8 @@ import {EpisodesModule} from "../episodes/episodes.module";
         EpisodesModule
     ],
     controllers: [MediaController],
-    providers: [MediaService]
+    providers: [MediaService],
+    exports: [MediaService]
 })
 
 export class MediaModule {

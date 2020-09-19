@@ -48,7 +48,7 @@ GameSchema.methods = {
      * Mapping function that transforms a model into a correct Response Object
      */
     toResponseObject: function(): GameResponseObject {
-        const {_id, name, _createdAt, _updatedAt, cover, screenshot, releaseDate, episodes, igdbId} = this;
+        const {_id, name, _createdAt, _updatedAt, cover, screenshot, releaseDate, episodes, igdbId, medias} = this;
         return {
             _id,
             _createdAt,
@@ -58,7 +58,8 @@ GameSchema.methods = {
             screenshot,
             releaseDate,
             episodes,
-            igdbId
+            igdbId,
+            medias
         }
     }
 };
