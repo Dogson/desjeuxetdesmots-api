@@ -50,7 +50,7 @@ export class Episode extends DefaultModel {
     generatedGames: boolean;
 
     @Prop({
-        type: [MediaSchema]
+        type: MediaSchema
     })
     media: Media;
 

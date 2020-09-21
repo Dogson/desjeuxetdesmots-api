@@ -6,7 +6,7 @@ async function mediaToEpisodes() {
 
 
 // Connection URL
-    const url = "mongodb+srv://gwenael:TVMQRuNH0yCzH6eD@cluster0.r0vxx.gcp.mongodb.net/gamerjuice?retryWrites=true&w=majority";
+    const url = process.env.CONNECTION_STRING;
     const client = new MongoClient(url);
 // Use connect method to connect to the server
     await client.connect();
