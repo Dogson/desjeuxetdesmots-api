@@ -1,5 +1,7 @@
 import {IsString, IsOptional, IsUrl, IsDateString} from "class-validator";
 import {Types} from "mongoose";
+import {MediaResponseObject} from "./media.dto";
+import {MediaConfig} from "../model/media.model";
 
 /**
  * Request object format used in POSTing a new episode
@@ -15,6 +17,7 @@ export class CreateEpisodeDto {
     readonly fileUrl: string;
     @IsDateString()
     readonly releaseDate: Date;
+    readonly config: MediaConfig;
 }
 
 /**
@@ -40,6 +43,12 @@ export class UpdateEpisodeDto {
     readonly games: Types.ObjectId[];
 }
 
+export class GenerateEpisodesDto {
+    @IsString()
+    readonly feedUrl: string;
+    readonly config: MediaConfig;
+}
+
 /**
  * Response object format sent by the API
  */
@@ -54,4 +63,5 @@ export class EpisodeResponseObject {
     readonly releaseDate: Date;
     readonly games: Types.ObjectId[];
     readonly verified: boolean;
+    readonly media: MediaResponseObject;
 }

@@ -9,7 +9,6 @@ import {HttpErrorFilter} from "./shared/handler/http-error.filter";
 import {LoggingInterceptor} from "./shared/handler/logging.interceptor";
 import { UsersModule } from './users/users.module';
 import { ConfigModule } from '@nestjs/config';
-import { MediaModule } from './media/media.module';
 import dotenv = require('dotenv');
 import {EpisodesModule} from "./episodes/episodes.module";
 
@@ -23,7 +22,6 @@ dotenv.config({path: "../.env.local"});
         MongooseModule.forRoot(process.env.CONNECTION_STRING),
         GamesModule,
         EpisodesModule,
-        MediaModule,
         UsersModule
     ],
     controllers: [

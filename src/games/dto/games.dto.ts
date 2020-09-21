@@ -1,6 +1,6 @@
 import {IsString, IsDateString, IsOptional, IsUrl} from "class-validator";
 import {Types} from "mongoose";
-import {MediaResponseObject} from "../../media/dto/media.dto";
+import {EpisodeResponseObject} from "../../episodes/dto/episodes.dto";
 
 /**
  * Request object format used in POSTing a new game
@@ -48,8 +48,6 @@ export class GameResponseObject {
     readonly cover: string;
     readonly screenshot: string;
     readonly releaseDate: Date;
-    readonly episodes: Types.ObjectId[];
+    readonly episodes: Types.ObjectId[] | EpisodeResponseObject[];
     readonly igdbId: string;
-    readonly searchableIndex: true;
-    readonly medias?: MediaResponseObject
 }

@@ -2,7 +2,7 @@ import {
     ForbiddenException, forwardRef, Inject,
     Injectable, InternalServerErrorException, Logger
 } from "@nestjs/common";
-import {Media, MediaConfig} from "../media/model/media.model";
+// import {Media, MediaConfig} from "../media/model/media.model";
 import {CreateGameDto, GameResponseObject} from "../games/dto/games.dto";
 import axios from "axios";
 import {InjectModel} from "@nestjs/mongoose";
@@ -12,6 +12,8 @@ import {GamesService} from "../games/games.service";
 import {ERROR_TYPES} from "../shared/const/error.types";
 import {asyncForEach} from "../shared/utils/utils";
 import {Episode} from "../episodes/model/episodes.model";
+import {MediaConfig} from "../episodes/model/media.model";
+import {Types} from "mongoose";
 
 @Injectable()
 export class GameGenerationService {
@@ -25,23 +27,22 @@ export class GameGenerationService {
 
     /**
      * For a given episode, fetch and populate related games and update episode with said games
-     * @param media
      * @param episode
+     * @param mediaConfig
      */
-    public async fetchAndPopulateGames(media: Media, episode: Episode) {
+    public async fetchAndPopulateGames(episode: Episode, mediaConfig: MediaConfig) {
         this.logger.log(`Starting populating game for episode : ${episode.name}`);
-        const mediaConfig: MediaConfig = media.config;
         const stringToParse = episode[mediaConfig.parseProperty];
         try {
             const games = await this._getVideoGamesFromString(stringToParse, mediaConfig);
-            return await this.createAndUpdateGamesAndEpisode(media, games, episode);
+            return await this.createAndUpdateGamesAndEpisode(games, episode);
 
         } catch (err) {
             throw new InternalServerErrorException(ERROR_TYPES.unable_to_parse_games(err))
         }
     }
 
-    async createAndUpdateGamesAndEpisode(media, games: CreateGameDto[], episode) {
+    async createAndUpdateGamesAndEpisode(games: CreateGameDto[], episode: Episode) {
         try {
             const gamesCreated = [];
             await asyncForEach(games, async (game) => {
@@ -53,7 +54,7 @@ export class GameGenerationService {
             });
 
             const gamesId = gamesCreated.map(game => game._id);
-            return await this.addGamesToEpisode(media, episode, gamesId);
+            return await this.addGamesToEpisode(episode, gamesId);
         } catch (err) {
             this.logger.error(err)
         }
@@ -80,21 +81,19 @@ export class GameGenerationService {
 
     /**
      * Add games ids array to episode
-     * @param media
      * @param episode
      * @param gamesId
      */
-    public async addGamesToEpisode(media, episode, gamesId: string[]) {
+    public async addGamesToEpisode(episode: Episode, gamesId: string[]) {
 
-        const episodeIndex = media.episodes.map((ep) => ep._id).indexOf(episode._id);
         gamesId.forEach((gameId) => {
-            if (episode.games.indexOf(gameId) === -1) {
-                media.episodes[episodeIndex].games.push(gameId)
+            if (episode.games.map(id => id.toString()).indexOf(gameId) === -1) {
+                episode.games.push(new Types.ObjectId(gameId));
             }
         });
-        media.episodes[episodeIndex].generatedGames = true;
-        this.logger.log(`Episode ${episode.name} has generated ${gamesId.length} games.`);
-        await media.save();
+        episode.generatedGames = true;
+        this.logger.log(`Episode ${episode.name} has generated ${gamesId.length}O games.`);
+        await episode.save();
     }
 
     /**

@@ -16,7 +16,6 @@ import {asyncForEach, isObjectId} from "../shared/utils/utils";
 import {ERROR_TYPES} from "../shared/const/error.types";
 import {Model, Types} from "mongoose";
 import {EpisodesService} from "../episodes/episodes.service";
-import {MediaService} from "../media/media.service";
 import {IGameQuery} from "./query/games.query.interface";
 
 @Injectable()
@@ -24,7 +23,6 @@ export class GamesService {
     constructor(
         @InjectModel('Game') private readonly gameModel: Model<Game>,
         @Inject(forwardRef(() => EpisodesService)) private readonly episodesService: EpisodesService,
-        @Inject(forwardRef(() => MediaService)) private readonly mediaService: MediaService
     ) {
     }
 
@@ -90,11 +88,15 @@ export class GamesService {
             .limit(limit)
             .exec();
 
-        await asyncForEach(gameResults, async (gameResult) => {
-            const episodesId = gameResult.episodes;
-            gameResult.medias = await this.mediaService.findByEpisodes(episodesId, false);
+
+        const mappedGames = gameResults.map(game => game.toResponseObject());
+
+        await asyncForEach(mappedGames, async (game, i) => {
+            game.episodes = await this._getEpisodesFromGame(game);
+            mappedGames[i] = game;
         });
-        return gameResults.map(game => game.toResponseObject())
+
+        return mappedGames;
     }
 
     /**
@@ -103,7 +105,10 @@ export class GamesService {
      */
     async findOne(id: string): Promise<GameResponseObject> {
         const game = await this._findById(id);
-        return game.toResponseObject();
+        return {
+            ...game.toResponseObject(),
+            episodes:  await this._getEpisodesFromGame(game)
+        };
     }
 
     /**
@@ -146,6 +151,26 @@ export class GamesService {
         return game;
     }
 
+    /**
+     * Find episodes doc from a game
+     * @param game
+     * @private
+     */
+    private async _getEpisodesFromGame(game) {
+        const episodesId = game.episodes;
+        const episodes = [];
+        await asyncForEach(episodesId, async (episodeId) => {
+            try {
+                const episode = await this.episodesService.findOne(episodeId);
+                episodes.push(episode);
+            } catch (err) {
+                if (!err || !err.response || err.response.error != ERROR_TYPES.not_found("").error) {
+                    throw err;
+                }
+            }
+        });
+        return episodes;
+    }
 
     private async _findAndUpdate(id: string, updateGameDto: UpdateGameDto): Promise<Game> {
         if (!isObjectId(id)) {

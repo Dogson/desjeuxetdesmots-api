@@ -3,11 +3,13 @@ import {DEFAULT_SCHEMA_OPTIONS} from "../../shared/const/schema.options";
 import {DefaultModel} from "../../shared/const/default.model";
 import {EpisodeResponseObject} from "../dto/episodes.dto";
 import {Types} from "mongoose";
+import {Media, MediaSchema} from "./media.model";
 
 @Schema(DEFAULT_SCHEMA_OPTIONS)
 export class Episode extends DefaultModel {
     @Prop({
-        required: true
+        required: true,
+        unique: true
     })
     name: string;
 
@@ -47,6 +49,11 @@ export class Episode extends DefaultModel {
     })
     generatedGames: boolean;
 
+    @Prop({
+        type: [MediaSchema]
+    })
+    media: Media;
+
     toResponseObject: () => EpisodeResponseObject;
 }
 
@@ -57,7 +64,7 @@ EpisodeSchema.methods = {
      * Mapping function that transforms a model into a correct Response Object
      */
     toResponseObject: function (): EpisodeResponseObject {
-        const {_id, name, _createdAt, _updatedAt, image, description, fileUrl, releaseDate, games, verified} = this;
+        const {_id, name, _createdAt, _updatedAt, image, description, fileUrl, releaseDate, games, verified, media} = this;
         return {
             _id,
             _createdAt,
@@ -68,7 +75,8 @@ EpisodeSchema.methods = {
             fileUrl,
             releaseDate,
             games,
-            verified
+            verified,
+            media
         }
     }
 };

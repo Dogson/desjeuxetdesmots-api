@@ -1,8 +1,9 @@
-import {Module} from "@nestjs/common";
+import {forwardRef, Module} from "@nestjs/common";
 import {MongooseModule} from "@nestjs/mongoose";
 import {EpisodeSchema} from "./model/episodes.model";
 import {EpisodesService} from "./episodes.service";
 import {GameGenerationModule} from "../game-generation/game-generation.module";
+import {EpisodesController} from "./episodes.controller";
 
 
 @Module({
@@ -11,8 +12,9 @@ import {GameGenerationModule} from "../game-generation/game-generation.module";
             name: 'Episode',
             schema: EpisodeSchema
         }]),
-        GameGenerationModule
+        forwardRef(() => GameGenerationModule),
     ],
+    controllers: [EpisodesController],
     providers: [EpisodesService],
     exports: [EpisodesService]
 })

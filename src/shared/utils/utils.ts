@@ -18,9 +18,11 @@ export async function asyncForEach(array, callback) {
 }
 
 export async function asyncMap(array, callback) {
+    const newArray = array;
     for (let index = 0; index < array.length; index++) {
-        array[index] = callback(array[index], index, array);
+        newArray[index] = await callback(array[index], index, array);
     }
+    return newArray;
 }
 
 export function removeEmptyAttrFromObj(obj) {
