@@ -81,12 +81,15 @@ export class GamesService {
      * Find all games
      */
     async findAll(query: IGameQuery): Promise<GameResponseObject[]> {
-        const {page, limit} = query;
-        const gameResults: Game[] = await this.gameModel.find()
+        const {page, limit, ...search} = query;
+
+        const gameResults: Game[] = await this.gameModel
+            .find(search)
             .sort({_updatedAt: -1})
             .skip((page - 1) * limit)
             .limit(limit)
             .exec();
+
         await asyncForEach(gameResults, async (gameResult) => {
             const episodesId = gameResult.episodes;
             gameResult.medias = await this.mediaService.findByEpisodes(episodesId, false);

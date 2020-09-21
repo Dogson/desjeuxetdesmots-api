@@ -1,6 +1,7 @@
 export interface IDefaultQuery {
     page: number;
     limit: number;
+    searchableIndex?: string | RegExp
 }
 
 export const DEFAULT_QUERY_VALUES: IDefaultQuery = {

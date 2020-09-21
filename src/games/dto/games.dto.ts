@@ -50,5 +50,6 @@ export class GameResponseObject {
     readonly releaseDate: Date;
     readonly episodes: Types.ObjectId[];
     readonly igdbId: string;
+    readonly searchableIndex: true;
     readonly medias?: MediaResponseObject
 }

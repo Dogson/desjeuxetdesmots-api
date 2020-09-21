@@ -7,3 +7,5 @@ export interface IGameQuery extends IDefaultQuery {
 export const DEFAULT_GAME_QUERY: IGameQuery = {
     ...DEFAULT_QUERY_VALUES
 };
+
+export const GAME_SEARCHABLE_INDEX = "name";

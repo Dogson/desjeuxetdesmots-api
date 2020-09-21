@@ -2,8 +2,9 @@ import {Body, Controller, Delete, Get, Logger, Param, Post, Put, Query, UsePipes
 import {GamesService} from "./games.service";
 import {CreateGameDto, GameResponseObject, UpdateGameDto} from "./dto/games.dto";
 import {ValidationPipe} from "../shared/handler/validation.pipe";
-import {DEFAULT_GAME_QUERY, IGameQuery} from "./query/games.query.interface";
+import {DEFAULT_GAME_QUERY, GAME_SEARCHABLE_INDEX, IGameQuery} from "./query/games.query.interface";
 import {_parseDefaultQueryTypes} from "../shared/const/default.query.interface";
+import {removeEmptyAttrFromObj} from "../shared/utils/utils";
 
 @Controller('games')
 export class GamesController {
@@ -41,11 +42,9 @@ export class GamesController {
      */
     @Get()
     async findAllGames(@Query() query: IGameQuery): Promise<GameResponseObject[]> {
-        console.log(query);
         query = this._mapQueryWithDefault(query);
-        console.log(query);
         query = this._parseQueryTypes(query);
-        console.log(query);
+        query = this._mapQuerySearchableIndex(query);
         return this.gamesService.findAll(query);
     }
 
@@ -69,6 +68,7 @@ export class GamesController {
     }
 
     private _mapQueryWithDefault(query: IGameQuery): IGameQuery {
+        query = removeEmptyAttrFromObj(query);
         return {
             ...DEFAULT_GAME_QUERY,
             ...query
@@ -83,6 +83,15 @@ export class GamesController {
     }
 
     private _parseGameQueryTypes(query: IGameQuery): IGameQuery {
+        return query;
+    }
+
+    private _mapQuerySearchableIndex(query: IGameQuery): IGameQuery {
+        if (!query[GAME_SEARCHABLE_INDEX])
+            return query;
+        query.searchableIndex = new RegExp(query[GAME_SEARCHABLE_INDEX].toUpperCase(), 'i');
+        delete query[GAME_SEARCHABLE_INDEX];
+
         return query;
     }
 }

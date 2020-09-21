@@ -21,6 +21,9 @@ export class Game extends DefaultModel {
     })
     screenshot: string;
 
+    @Prop()
+    searchableIndex: string;
+
     @Prop({
         required: true
     })
@@ -43,12 +46,19 @@ export class Game extends DefaultModel {
 
 const GameSchema = SchemaFactory.createForClass(Game);
 
+GameSchema.pre<Game>('save', function () {
+    /**
+     * Setting searchableIndex to name uppercase to facilitate future searches
+     */
+    this.searchableIndex = this.name.toUpperCase();
+});
+
 GameSchema.methods = {
     /**
      * Mapping function that transforms a model into a correct Response Object
      */
-    toResponseObject: function(): GameResponseObject {
-        const {_id, name, _createdAt, _updatedAt, cover, screenshot, releaseDate, episodes, igdbId, medias} = this;
+    toResponseObject: function (): GameResponseObject {
+        const {_id, name, _createdAt, _updatedAt, cover, screenshot, releaseDate, episodes, igdbId, medias, searchableIndex} = this;
         return {
             _id,
             _createdAt,
@@ -59,7 +69,8 @@ GameSchema.methods = {
             releaseDate,
             episodes,
             igdbId,
-            medias
+            medias,
+            searchableIndex
         }
     }
 };
