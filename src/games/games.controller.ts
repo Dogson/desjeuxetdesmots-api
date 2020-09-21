@@ -2,8 +2,8 @@ import {Body, Controller, Delete, Get, Logger, Param, Post, Put, Query, UsePipes
 import {GamesService} from "./games.service";
 import {CreateGameDto, GameResponseObject, UpdateGameDto} from "./dto/games.dto";
 import {ValidationPipe} from "../shared/handler/validation.pipe";
-import {DEFAULT_GAME_QUERY, GameQuery} from "./query/games.query";
-import {_parseDefaultQueryTypes} from "../shared/const/default.query";
+import {DEFAULT_GAME_QUERY, IGameQuery} from "./query/games.query.interface";
+import {_parseDefaultQueryTypes} from "../shared/const/default.query.interface";
 
 @Controller('games')
 export class GamesController {
@@ -40,9 +40,12 @@ export class GamesController {
      * GET /games
      */
     @Get()
-    async findAllGames(@Query() query: GameQuery): Promise<GameResponseObject[]> {
+    async findAllGames(@Query() query: IGameQuery): Promise<GameResponseObject[]> {
+        console.log(query);
         query = this._mapQueryWithDefault(query);
+        console.log(query);
         query = this._parseQueryTypes(query);
+        console.log(query);
         return this.gamesService.findAll(query);
     }
 
@@ -65,16 +68,21 @@ export class GamesController {
         return null;
     }
 
-    private _mapQueryWithDefault(query: GameQuery): GameQuery {
+    private _mapQueryWithDefault(query: IGameQuery): IGameQuery {
         return {
             ...DEFAULT_GAME_QUERY,
             ...query
         }
     }
 
-    private _parseQueryTypes(query: GameQuery): GameQuery {
+    private _parseQueryTypes(query: IGameQuery): IGameQuery {
         return {
+            ...this._parseGameQueryTypes(query),
             ..._parseDefaultQueryTypes(query)
         }
+    }
+
+    private _parseGameQueryTypes(query: IGameQuery): IGameQuery {
+        return query;
     }
 }

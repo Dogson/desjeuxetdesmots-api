@@ -2,7 +2,7 @@ import {Body, Controller, Delete, Get, Logger, Param, Post, Put, Query, UsePipes
 import {MediaService} from "./media.service";
 import {CreateMediaDto, GenerateMediaDto, MediaResponseObject, UpdateMediaDto} from "./dto/media.dto";
 import {ValidationPipe} from "../shared/handler/validation.pipe";
-import {DEFAULT_MEDIA_QUERY, MediaQuery} from "./query/media.query";
+import {DEFAULT_MEDIA_QUERY, IMediaQuery} from "./query/media.query.interface";
 
 @Controller('media')
 export class MediaController {
@@ -49,7 +49,7 @@ export class MediaController {
      * GET /media
      */
     @Get()
-    async findAllMedia(@Query() query: MediaQuery): Promise<MediaResponseObject[]> {
+    async findAllMedia(@Query() query: IMediaQuery): Promise<MediaResponseObject[]> {
         query = this._mapQueryWithDefault(query);
         return this.mediaService.findAll(query);
     }
