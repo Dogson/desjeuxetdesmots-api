@@ -29,6 +29,11 @@ export class Media extends mongoose.Document {
     })
     description: string;
 
+    @Prop({
+        required: true
+    })
+    type: "podcast" | "video";
+
     toResponseObject: () => MediaResponseObject;
 }
 
@@ -39,11 +44,12 @@ MediaSchema.methods = {
      * Mapping function that transforms a model into a correct Response Object
      */
     toResponseObject: function (): MediaResponseObject {
-        const {name, logo, description} = this;
+        const {name, logo, description, type} = this;
         return {
             name,
             logo,
-            description
+            description,
+            type
         }
     }
 };
