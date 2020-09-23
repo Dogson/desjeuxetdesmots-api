@@ -2,7 +2,8 @@ import {Body, Controller, Delete, Get, Logger, Param, Post, Put, Query, UsePipes
 import {EpisodesService} from "./episodes.service";
 import {CreateEpisodeDto, GenerateEpisodesDto, EpisodeResponseObject, UpdateEpisodeDto} from "./dto/episodes.dto";
 import {ValidationPipe} from "../shared/handler/validation.pipe";
-import {DEFAULT_QUERY_VALUES, IDefaultQuery} from "../shared/const/default.query.interface";
+import {IDefaultQuery} from "../shared/const/default.query.interface";
+import {DEFAULT_EPISODE_QUERY} from "./query/episodes.query";
 
 @Controller('episodes')
 export class EpisodesController {
@@ -75,7 +76,7 @@ export class EpisodesController {
 
     private _mapQueryWithDefault(query) {
         return {
-            ...DEFAULT_QUERY_VALUES,
+            ...DEFAULT_EPISODE_QUERY,
             ...query
         }
     }
