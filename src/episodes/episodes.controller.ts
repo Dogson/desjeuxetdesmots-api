@@ -1,22 +1,23 @@
-import {Body, Controller, Delete, Get, Logger, Param, Post, Put, Query, UsePipes} from '@nestjs/common';
+import {Body, Controller, Delete, Get, Logger, Param, Post, Put, Query, UseGuards, UsePipes} from '@nestjs/common';
 import {EpisodesService} from "./episodes.service";
 import {CreateEpisodeDto, GenerateEpisodesDto, EpisodeResponseObject, UpdateEpisodeDto} from "./dto/episodes.dto";
 import {ValidationPipe} from "../shared/handler/validation.pipe";
 import {IDefaultQuery} from "../shared/const/default.query.interface";
 import {DEFAULT_EPISODE_QUERY} from "./query/episodes.query";
+import {AuthGuard} from "../shared/handler/auth.guard";
 
 @Controller('episodes')
 export class EpisodesController {
     private logger = new Logger('EpisodeController');
 
     constructor(private readonly episodesService: EpisodesService) {
-
     }
 
     /**
      * POST /episodes/generate
      */
     @Post('generate')
+    @UseGuards(new AuthGuard())
     @UsePipes(new ValidationPipe())
     async generateEpisodes(@Body() generateEpisodesDto: GenerateEpisodesDto) {
         const {config, feedUrl} = generateEpisodesDto;
@@ -28,6 +29,7 @@ export class EpisodesController {
      * @param createEpisodeDto
      */
     @Post()
+    @UseGuards(new AuthGuard())
     @UsePipes(new ValidationPipe())
     async createEpisode(@Body() createEpisodeDto: CreateEpisodeDto): Promise<EpisodeResponseObject> {
         this.logger.log(JSON.stringify(createEpisodeDto));
@@ -40,6 +42,7 @@ export class EpisodesController {
      * @param updateEpisodeDto
      */
     @Put(':id')
+    @UseGuards(new AuthGuard())
     @UsePipes(new ValidationPipe())
     async updateEpisode(@Param('id') id: string, @Body() updateEpisodeDto: UpdateEpisodeDto): Promise<EpisodeResponseObject> {
         this.logger.log(JSON.stringify(updateEpisodeDto));
@@ -69,6 +72,7 @@ export class EpisodesController {
      * @param id
      */
     @Delete(':id')
+    @UseGuards(new AuthGuard())
     async deleteEpisode(@Param('id') id: string): Promise<any> {
         await this.episodesService.delete(id);
         return null;

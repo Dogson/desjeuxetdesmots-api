@@ -1,10 +1,11 @@
-import {Body, Controller, Delete, Get, Logger, Param, Post, Put, Query, UsePipes} from '@nestjs/common';
+import {Body, Controller, Delete, Get, Logger, Param, Post, Put, Query, UseGuards, UsePipes} from '@nestjs/common';
 import {GamesService} from "./games.service";
 import {CreateGameDto, GameResponseObject, UpdateGameDto} from "./dto/games.dto";
 import {ValidationPipe} from "../shared/handler/validation.pipe";
 import {DEFAULT_GAME_QUERY, GAME_SEARCHABLE_INDEX, IGameQuery} from "./query/games.query.interface";
 import {_parseDefaultQueryTypes} from "../shared/const/default.query.interface";
 import {removeEmptyAttrFromObj} from "../shared/utils/utils";
+import {AuthGuard} from "../shared/handler/auth.guard";
 
 @Controller('games')
 export class GamesController {
@@ -19,6 +20,7 @@ export class GamesController {
      * @param createGameDto : request body
      */
     @Post()
+    @UseGuards(new AuthGuard())
     @UsePipes(new ValidationPipe())
     async addGame(@Body() createGameDto: CreateGameDto): Promise<GameResponseObject> {
         this.logger.log(JSON.stringify(createGameDto));
@@ -31,6 +33,7 @@ export class GamesController {
      * @param updateGameDto : request body ; fields to update
      */
     @Put(':id')
+    @UseGuards(new AuthGuard())
     @UsePipes(new ValidationPipe())
     async updateGame(@Param('id') id: string, @Body() updateGameDto: UpdateGameDto): Promise<GameResponseObject> {
         this.logger.log(JSON.stringify(updateGameDto));
@@ -62,6 +65,7 @@ export class GamesController {
      * @param id
      */
     @Delete(':id')
+    @UseGuards(new AuthGuard())
     async deleteGame(@Param('id') id: string): Promise<any> {
         await this.gamesService.delete(id);
         return null;

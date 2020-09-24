@@ -1,4 +1,4 @@
-import {IsString, IsOptional, IsUrl, IsDateString} from "class-validator";
+import {IsString, IsOptional, IsUrl, IsDateString, IsBoolean} from "class-validator";
 import {Types} from "mongoose";
 import {MediaResponseObject} from "./media.dto";
 import {MediaConfig} from "../model/media.model";
@@ -39,6 +39,9 @@ export class UpdateEpisodeDto {
     @IsDateString()
     @IsOptional()
     readonly releaseDate: Date;
+    @IsBoolean()
+    @IsOptional()
+    readonly verified: true;
     @IsOptional()
     readonly games: Types.ObjectId[];
 }
