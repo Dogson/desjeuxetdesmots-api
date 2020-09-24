@@ -10,8 +10,7 @@ import {EpisodesModule} from "../episodes/episodes.module";
 @Module({
     imports: [
         MongooseModule.forFeature([{ name: 'Game', schema: GameSchema }]),
-        forwardRef(() => EpisodesModule),
-        EpisodesModule
+        forwardRef(() => EpisodesModule)
     ],
     controllers: [GamesController],
     providers: [GamesService],

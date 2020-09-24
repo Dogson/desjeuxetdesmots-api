@@ -4,6 +4,7 @@ import {EpisodeSchema} from "./model/episodes.model";
 import {EpisodesService} from "./episodes.service";
 import {GameGenerationModule} from "../game-generation/game-generation.module";
 import {EpisodesController} from "./episodes.controller";
+import {GamesModule} from "../games/games.module";
 
 
 @Module({
@@ -12,6 +13,7 @@ import {EpisodesController} from "./episodes.controller";
             name: 'Episode',
             schema: EpisodeSchema
         }]),
+        forwardRef(() => GamesModule),
         forwardRef(() => GameGenerationModule),
     ],
     controllers: [EpisodesController],

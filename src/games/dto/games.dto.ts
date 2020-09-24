@@ -48,6 +48,6 @@ export class GameResponseObject {
     readonly cover: string;
     readonly screenshot: string;
     readonly releaseDate: Date;
-    readonly episodes: Types.ObjectId[] | EpisodeResponseObject[];
+    episodes?: Types.ObjectId[] | EpisodeResponseObject[];
     readonly igdbId: string;
 }

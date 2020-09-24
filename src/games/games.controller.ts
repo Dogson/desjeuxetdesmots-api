@@ -54,7 +54,7 @@ export class GamesController {
      */
     @Get(':id')
     async findOneGame(@Param('id') id: string): Promise<GameResponseObject> {
-        return this.gamesService.findOne(id);
+        return this.gamesService.findOne(id, true);
     }
 
     /**

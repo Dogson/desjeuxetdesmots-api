@@ -102,13 +102,15 @@ export class GamesService {
     /**
      * Find game by id
      * @param id
+     * @param withEpisodes
      */
-    async findOne(id: string): Promise<GameResponseObject> {
-        const game = await this._findById(id);
-        return {
-            ...game.toResponseObject(),
-            episodes:  await this._getEpisodesFromGame(game)
-        };
+    async findOne(id: string, withEpisodes: boolean): Promise<GameResponseObject> {
+        const game = await this._findById(id, withEpisodes);
+        const gameRO = {...game.toResponseObject()};
+        if (withEpisodes) {
+            gameRO.episodes = await this._getEpisodesFromGame(game);
+        }
+        return gameRO;
     }
 
     /**
@@ -135,13 +137,18 @@ export class GamesService {
         }
     }
 
-    private async _findById(id: string): Promise<Game> {
+    private async _findById(id: string, withEpisodes: boolean): Promise<Game> {
         if (!isObjectId(id)) {
             throw new NotFoundException(ERROR_TYPES.not_found("game"));
         }
+        let projection;
+        if (!withEpisodes) {
+            projection = {episodes: 0}
+        }
+
         let game;
         try {
-            game = await this.gameModel.findById(id).exec();
+            game = await this.gameModel.findById(id, projection).exec();
         } catch (error) {
             throw new HttpException(error.message, error.status);
         }

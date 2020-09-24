@@ -1,6 +1,6 @@
 import {
-    ForbiddenException,
-    HttpException,
+    ForbiddenException, forwardRef,
+    HttpException, Inject,
     Injectable, InternalServerErrorException, Logger,
     NotFoundException
 } from "@nestjs/common";
@@ -16,6 +16,7 @@ import {Episode} from "./model/episodes.model";
 import {GameGenerationService} from "../game-generation/game-generation.service";
 import {CreateEpisodeDto, EpisodeResponseObject, UpdateEpisodeDto} from "./dto/episodes.dto";
 import {Types} from "mongoose";
+import {GamesService} from "../games/games.service";
 
 @Injectable()
 export class EpisodesService {
@@ -23,7 +24,8 @@ export class EpisodesService {
 
     constructor(
         @InjectModel('Episode') private readonly episodeModel: Model<Episode>,
-        private readonly gameGenerationService: GameGenerationService
+        private readonly gameGenerationService: GameGenerationService,
+        @Inject(forwardRef(() => GamesService)) private readonly gamesService: GamesService
     ) {
     }
 
@@ -93,7 +95,6 @@ export class EpisodesService {
      * Find all episodes from query
      */
     async findAll(query): Promise<EpisodeResponseObject[]> {
-        // Do not fetch episodes subdocs if param "showEpisode" is false
         const {page, limit, ...search} = query;
 
         const episodeResults: Episode[] = await this.episodeModel
@@ -103,7 +104,14 @@ export class EpisodesService {
             .limit(limit)
             .exec();
 
-        return episodeResults.map(ep => ep.toResponseObject())
+        const mappedEpisodes = episodeResults.map(ep => ep.toResponseObject());
+
+        await asyncForEach(mappedEpisodes, async (ep, i) => {
+            ep.games = await this._getGamesForEpisode(ep);
+            mappedEpisodes[i] = ep;
+        });
+
+        return mappedEpisodes;
     }
 
     /**
@@ -111,7 +119,7 @@ export class EpisodesService {
      * @param id
      */
     async findOne(id: string): Promise<EpisodeResponseObject> {
-        const episode = await this._find(id);
+        const episode = await this._findById(id);
         return episode.toResponseObject();
     }
 
@@ -139,7 +147,7 @@ export class EpisodesService {
         }
     }
 
-    private async _find(id: string): Promise<Episode> {
+    private async _findById(id): Promise<Episode> {
         if (!isObjectId(id)) {
             throw new NotFoundException(ERROR_TYPES.not_found("episode"));
         }
@@ -179,4 +187,22 @@ export class EpisodesService {
         });
         this.logger.log("All games have been generated for this media");
     }
+
+
+    private async _getGamesForEpisode(episode) {
+        const gamesId = episode.games;
+        const games = [];
+        await asyncForEach(gamesId, async (gameId) => {
+            try {
+                const game = await this.gamesService.findOne(gameId, false);
+                games.push(game);
+            } catch (err) {
+                if (!err || !err.response || err.response.error != ERROR_TYPES.not_found("").error) {
+                    throw err;
+                }
+            }
+        });
+        return games;
+    }
+
 }
