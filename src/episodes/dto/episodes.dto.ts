@@ -43,7 +43,7 @@ export class UpdateEpisodeDto {
     @IsOptional()
     readonly verified: true;
     @IsOptional()
-    readonly games: Types.ObjectId[];
+    games: any;
 }
 
 export class GenerateEpisodesDto {

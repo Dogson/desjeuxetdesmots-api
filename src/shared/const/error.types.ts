@@ -66,5 +66,11 @@ export const ERROR_TYPES = {
             error: "unable_to_connect_to_igdb",
             message: `Unable to connect to the IGDB API : ${err}`
         }
-    }
+    },
+    bad_game: (err) => {
+        return {
+            error: "bad_game",
+            message: `This game is wrongly formatted : ${err} \n Please provide an existing gameId or a correct igdb game information`
+        }
+    },
 };

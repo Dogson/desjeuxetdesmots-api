@@ -1,4 +1,5 @@
 import {
+    BadRequestException,
     ForbiddenException, forwardRef,
     HttpException, Inject,
     Injectable, InternalServerErrorException, Logger,
@@ -79,15 +80,94 @@ export class EpisodesService {
      */
     async update(id: string, updateEpisodeDto: UpdateEpisodeDto): Promise<EpisodeResponseObject> {
         try {
-            const episode = await this._findAndUpdate(id, updateEpisodeDto);
-            const result = await episode.save();
-            return result.toResponseObject();
+            let episode = await this._findById(id);
+            if (updateEpisodeDto.games) {
+                const gamesToAdd = updateEpisodeDto.games.filter((game) => {
+                    const stringGames = episode.games.map((game) => game.toString());
+                    if (game._id) {
+                        return stringGames.indexOf(game._id.toString()) === -1;
+                    }
+                    if (game.igdbId) {
+                        return game;
+                    }
+                    return stringGames.indexOf(game.toString()) === -1;
+                });
+
+                const updateGameIds = updateEpisodeDto.games.map((game) => {
+                    if (game._id) {
+                        return game._id.toString();
+                    }
+                    if (game.igdbId) {
+                        return null
+                    } else return game.toString();
+                });
+                const gamesToRemove = episode.games.filter((gameId) => {
+                    return updateGameIds.indexOf(gameId.toString()) === -1;
+                });
+
+                const currentGames = [];
+                await asyncForEach(episode.games, async (gameId) => {
+                    const game = await this.gamesService.findOne(gameId, true);
+                    currentGames.push(game);
+                });
+
+                await asyncForEach(gamesToRemove, async (gameToRemove) => {
+                    await this.gamesService.removeEpisodeFromGame(episode._id, gameToRemove);
+                    await this.removeGameFromEpisode(gameToRemove, episode);
+                });
+
+                await asyncForEach(gamesToAdd, async (gameToAdd) => {
+                    let existingGame;
+                    if (gameToAdd.igdbId) {
+                        existingGame = await this.gamesService.findByIgdbId(gameToAdd.igdbId);
+                    } else if (gameToAdd._id) {
+                        existingGame = await this.gamesService.findById(gameToAdd._id, true);
+                    } else if (isObjectId(gameToAdd)) {
+                        existingGame = await this.gamesService.findById(gameToAdd, true);
+                    } else {
+                        throw new BadRequestException(ERROR_TYPES.bad_game(gameToAdd))
+                    }
+                    let existingGameId;
+                    if (!existingGame) {
+                        const createdGame = await this.gamesService.create(gameToAdd);
+                        existingGameId = createdGame._id;
+                    } else {
+                        existingGameId = existingGame._id;
+                    }
+                    await this.gamesService.pushEpisodesToGame(existingGameId, episode._id);
+                    await this.pushGameToEpisode(episode._id, existingGameId);
+                });
+
+                episode = await this._findById(id);
+                delete updateEpisodeDto.games;
+                episode.update(updateEpisodeDto);
+                const result = await episode.save();
+                return result.toResponseObject();
+            }
         } catch (err) {
             if (err && err.code === 11000) {
                 throw new ForbiddenException(ERROR_TYPES.duplicate_key(JSON.stringify(err.keyValue)));
             } else {
                 throw err;
             }
+        }
+    }
+
+    async pushGameToEpisode(id: string, gameId: string) {
+        if (!isObjectId(id)) {
+            throw new NotFoundException(ERROR_TYPES.not_found("episode"));
+        }
+        if (!isObjectId(gameId)) {
+            throw new NotFoundException(ERROR_TYPES.not_found("game"));
+        }
+
+        const episode = await this.episodeModel.updateOne(
+            {_id: id},
+            {$push: {'games': Types.ObjectId(gameId)}},
+        );
+
+        if (!episode) {
+            throw new NotFoundException(ERROR_TYPES.not_found("episode"));
         }
     }
 
@@ -147,6 +227,11 @@ export class EpisodesService {
         }
     }
 
+    async removeGameFromEpisode(gameToRemove, episode) {
+        episode.games = episode.games.filter(game => game.toString() !== gameToRemove.toString());
+        await episode.save();
+    }
+
     private async _findById(id): Promise<Episode> {
         if (!isObjectId(id)) {
             throw new NotFoundException(ERROR_TYPES.not_found("episode"));
@@ -157,18 +242,6 @@ export class EpisodesService {
         } catch (error) {
             throw new HttpException(error.message, error.status);
         }
-        if (!episode) {
-            throw new NotFoundException(ERROR_TYPES.not_found("episode"));
-        }
-        return episode;
-    }
-
-    private async _findAndUpdate(id: string, updateEpisodeDto: UpdateEpisodeDto): Promise<Episode> {
-        if (!isObjectId(id)) {
-            throw new NotFoundException(ERROR_TYPES.not_found("episode"));
-        }
-        const episode = await this.episodeModel.findOneAndUpdate({_id: id}, updateEpisodeDto, {new: true});
-
         if (!episode) {
             throw new NotFoundException(ERROR_TYPES.not_found("episode"));
         }

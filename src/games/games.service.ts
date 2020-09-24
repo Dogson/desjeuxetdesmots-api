@@ -1,4 +1,5 @@
 import {
+    BadRequestException,
     ForbiddenException,
     forwardRef,
     HttpException,
@@ -105,7 +106,7 @@ export class GamesService {
      * @param withEpisodes
      */
     async findOne(id: string, withEpisodes: boolean): Promise<GameResponseObject> {
-        const game = await this._findById(id, withEpisodes);
+        const game = await this.findById(id, withEpisodes);
         const gameRO = {...game.toResponseObject()};
         if (withEpisodes) {
             gameRO.episodes = await this._getEpisodesFromGame(game);
@@ -137,7 +138,7 @@ export class GamesService {
         }
     }
 
-    private async _findById(id: string, withEpisodes: boolean): Promise<Game> {
+    async findById(id: string, withEpisodes: boolean): Promise<Game> {
         if (!isObjectId(id)) {
             throw new NotFoundException(ERROR_TYPES.not_found("game"));
         }
@@ -189,5 +190,20 @@ export class GamesService {
             throw new NotFoundException(ERROR_TYPES.not_found("game"));
         }
         return game;
+    }
+
+    async removeEpisodeFromGame(episodeToRemove, game) {
+        const gameDoc = await this.findById(game, true);
+        if (!gameDoc) {
+            throw new BadRequestException(ERROR_TYPES.not_found("game"));
+        }
+        const newEpisodes = gameDoc.episodes.filter(ep => ep.toString() !== episodeToRemove.toString());
+        if (newEpisodes.length === 0) {
+            await gameDoc.deleteOne();
+        }
+        else {
+            gameDoc.episodes = newEpisodes;
+            await gameDoc.save();
+        }
     }
 }
