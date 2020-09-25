@@ -16,7 +16,7 @@ export async function parseRssMedia(feedUrl: string, config: MediaConfig): Promi
     return feed.items.map(function (entry) {
         return {
             name: entry.title,
-            image: entry.itunes.image,
+            image: entry.itunes.image || feed.image.url,
             description: generateEpisodeDescription(entry.itunes.summary, feedUrl),
             releaseDate: moment(entry.pubDate).toDate(),
             fileUrl: entry.enclosure.url,
@@ -42,7 +42,9 @@ function filterEpisodes(episode: CreateEpisodeDto): boolean {
     }
     if (episode.fileUrl.indexOf("acast") > -1)
         return episode.fileUrl.indexOf("djpod") === -1;
-    return true;
+
+    return episode.releaseDate >= moment(1325376).toDate();
+
 }
 
 /**
