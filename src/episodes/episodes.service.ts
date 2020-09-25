@@ -7,7 +7,7 @@ import {
 } from "@nestjs/common";
 
 import {InjectModel} from "@nestjs/mongoose";
-
+import _ = require("lodash");
 import {MediaConfig} from "./model/media.model";
 import {asyncForEach, isObjectId} from "../shared/utils/utils";
 import {ERROR_TYPES} from "../shared/const/error.types";
@@ -80,7 +80,7 @@ export class EpisodesService {
      */
     async update(id: string, updateEpisodeDto: UpdateEpisodeDto): Promise<EpisodeResponseObject> {
         try {
-            let episode = await this._findById(id);
+            const episode = await this._findById(id);
             if (updateEpisodeDto.games) {
                 const gamesToAdd = updateEpisodeDto.games.filter((game) => {
                     const stringGames = episode.games.map((game) => game.toString());
@@ -137,13 +137,10 @@ export class EpisodesService {
                     await this.gamesService.pushEpisodesToGame(existingGameId, episode._id);
                     await this.pushGameToEpisode(episode._id, existingGameId);
                 });
-
-                episode = await this._findById(id);
                 delete updateEpisodeDto.games;
-                episode.update(updateEpisodeDto);
-                const result = await episode.save();
-                return result.toResponseObject();
             }
+            const result = await this.episodeModel.findOneAndUpdate({_id: id}, updateEpisodeDto, {new: true}).exec();
+            return result.toResponseObject();
         } catch (err) {
             if (err && err.code === 11000) {
                 throw new ForbiddenException(ERROR_TYPES.duplicate_key(JSON.stringify(err.keyValue)));
@@ -225,6 +222,14 @@ export class EpisodesService {
         if (result.n === 0) {
             throw new NotFoundException(ERROR_TYPES.not_found("episode"));
         }
+    }
+
+    async deleteMany(deleteDto): Promise<any> {
+        if (!deleteDto || _.isEmpty(deleteDto)) {
+            throw new BadRequestException(ERROR_TYPES.validation_no_body);
+        }
+        return await this.episodeModel.deleteMany(deleteDto).exec();
+
     }
 
     async removeGameFromEpisode(gameToRemove, episode) {

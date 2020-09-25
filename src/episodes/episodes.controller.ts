@@ -67,6 +67,18 @@ export class EpisodesController {
         return this.episodesService.findOne(id);
     }
 
+
+    /**
+     * DELETE /episodes/:id
+     * @param deleteDto
+     */
+    @Delete()
+    @UseGuards(new AuthGuard())
+    async deleteEpisodes(@Body() deleteDto: UpdateEpisodeDto): Promise<any> {
+        await this.episodesService.deleteMany(deleteDto);
+        return null;
+    }
+
     /**
      * DELETE /episodes/:id
      * @param id
