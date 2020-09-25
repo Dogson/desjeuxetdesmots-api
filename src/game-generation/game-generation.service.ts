@@ -191,7 +191,7 @@ export class GameGenerationService {
             })
         } else {
             try {
-                return await this.igdbService.executeIgdbQuery(str, true, 100, token)
+                return await this.igdbService.executeIgdbQuery(str, false, 50, token)
             } catch (err) {
                 throw new ForbiddenException(ERROR_TYPES.unable_to_execute_igdb_query(err))
             }
