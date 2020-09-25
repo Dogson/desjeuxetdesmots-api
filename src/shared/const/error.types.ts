@@ -61,16 +61,22 @@ export const ERROR_TYPES = {
             message: `Unable to parse / fetch games: ${err}`
         }
     },
-    unable_to_connect_to_igdb: (err) => {
+    unable_to_execute_igdb_query: (err) => {
         return {
-            error: "unable_to_connect_to_igdb",
-            message: `Unable to connect to the IGDB API : ${err}`
+            error: "unable_to_execute_igdb_query",
+            message: `Unable to execute the IGDB query : ${err}`
         }
     },
     bad_game: (err) => {
         return {
             error: "bad_game",
             message: `This game is wrongly formatted : ${err} \n Please provide an existing gameId or a correct igdb game information`
+        }
+    },
+    twitch_token_error: (err) => {
+        return {
+            error: "twitch_token_error",
+            message: `An error occured while trying to get the IGDB access token from twitch : ${err}`
         }
     },
 };

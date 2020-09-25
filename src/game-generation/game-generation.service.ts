@@ -205,7 +205,7 @@ export class GameGenerationService {
                 });
                 return response.data.length === 0 ? [] : this._mappedGames(response.data);
             } catch (err) {
-                throw new ForbiddenException(ERROR_TYPES.unable_to_connect_to_igdb(err))
+                throw new ForbiddenException(ERROR_TYPES.unable_to_execute_igdb_query(err))
             }
         }
     }

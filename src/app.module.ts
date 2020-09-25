@@ -11,6 +11,7 @@ import { UsersModule } from './users/users.module';
 import { ConfigModule } from '@nestjs/config';
 import dotenv = require('dotenv');
 import {EpisodesModule} from "./episodes/episodes.module";
+import { IgdbModule } from './igdb/igdb.module';
 
 mongoose.set('useFindAndModify', false);
 mongoose.set('runValidators', true);
@@ -22,7 +23,8 @@ dotenv.config({path: "../.env.local"});
         MongooseModule.forRoot(process.env.CONNECTION_STRING),
         GamesModule,
         EpisodesModule,
-        UsersModule
+        UsersModule,
+        IgdbModule
     ],
     controllers: [
         AppController
