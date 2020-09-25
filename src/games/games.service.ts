@@ -84,11 +84,10 @@ export class GamesService {
 
         const gameResults: Game[] = await this.gameModel
             .find(search)
-            .sort({_updatedAt: -1})
+            .sort({releaseDate: -1})
             .skip((page - 1) * limit)
             .limit(limit)
             .exec();
-
 
         const mappedGames = gameResults.map(game => game.toResponseObject());
 
@@ -97,7 +96,7 @@ export class GamesService {
             mappedGames[i] = game;
         });
 
-        return mappedGames;
+        return mappedGames.filter(game => game.episodes.length > 0);
     }
 
     /**
