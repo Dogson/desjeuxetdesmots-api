@@ -2,9 +2,7 @@ import {
     ForbiddenException, forwardRef, Inject,
     Injectable, InternalServerErrorException, Logger
 } from "@nestjs/common";
-// import {Media, MediaConfig} from "../media/model/media.model";
 import {CreateGameDto, GameResponseObject} from "../games/dto/games.dto";
-import axios from "axios";
 import {InjectModel} from "@nestjs/mongoose";
 import {Model} from "mongoose";
 import {Game} from "../games/model/games.model";
@@ -14,6 +12,7 @@ import {asyncForEach} from "../shared/utils/utils";
 import {Episode} from "../episodes/model/episodes.model";
 import {MediaConfig} from "../episodes/model/media.model";
 import {Types} from "mongoose";
+import {IgdbService} from "../igdb/igdb.service";
 
 @Injectable()
 export class GameGenerationService {
@@ -21,7 +20,8 @@ export class GameGenerationService {
 
     constructor(
         @InjectModel('Game') private readonly gameModel: Model<Game>,
-        @Inject(forwardRef(() => GamesService)) private readonly gamesService: GamesService
+        @Inject(forwardRef(() => GamesService)) private readonly gamesService: GamesService,
+        @Inject(forwardRef(() => IgdbService)) private readonly igdbService: IgdbService
     ) {
     }
 
@@ -92,7 +92,7 @@ export class GameGenerationService {
             }
         });
         episode.generatedGames = true;
-        this.logger.log(`Episode ${episode.name} has generated ${gamesId.length}O games.`);
+        this.logger.log(`Episode ${episode.name} has generated ${gamesId.length} games.`);
         await episode.save();
     }
 
@@ -125,6 +125,7 @@ export class GameGenerationService {
      * @private
      */
     private async _getGamesFromArray(words: string[]): Promise<CreateGameDto[]> {
+        const token = await this.igdbService.getTwitchToken();
         const resultGames: CreateGameDto[] = [];
         for (let i = 0; i < words.length; i++) {
             let word: string = words[i];
@@ -135,7 +136,7 @@ export class GameGenerationService {
                 j++;
                 word = word + " " + words[j]
             }
-            matchingGames = await this._getAllPartiallyMatchingGames(word, null);
+            matchingGames = await this._getAllPartiallyMatchingGames(word, null, token);
             let matchingStr = word;
             let nonEmptyMatchingGames;
             if (matchingGames.length > 0) {
@@ -144,7 +145,7 @@ export class GameGenerationService {
                 while (matchingGames.length > 0 && j - 1 < words.length) {
                     j++;
                     const newMatchingStr = matchingStr + " " + words[j];
-                    matchingGames = await this._getAllPartiallyMatchingGames(newMatchingStr, matchingGames);
+                    matchingGames = await this._getAllPartiallyMatchingGames(newMatchingStr, matchingGames, token);
                     if (matchingGames.length > 0) {
                         matchingStr = newMatchingStr;
                         //On récupère le dernier array non vide des matchingGames
@@ -180,66 +181,23 @@ export class GameGenerationService {
      * If matchingGames is null, looks for string occurences in IGDB API
      * @param str
      * @param matchingGames
+     * @param token
      * @private
      */
-    async _getAllPartiallyMatchingGames(str: string, matchingGames: any[]): Promise<CreateGameDto[]> {
-        const igdbKey = process.env.IGDB_API_KEY;
-        const igdbUrl = process.env.IGDB_API_URL;
-        const endpointName = process.env.IGDB_API_GAMES_ENDPOINTS;
-        const url = `${igdbUrl}${endpointName}`;
+    async _getAllPartiallyMatchingGames(str: string, matchingGames: any[], token: string): Promise<CreateGameDto[]> {
         if (matchingGames) {
             return matchingGames.filter((game) => {
                 return game.name.toUpperCase().indexOf(str.toUpperCase() + " ") === 0 || game.name.toUpperCase() === str.toUpperCase();
             })
         } else {
             try {
-                const response = await axios({
-                    url: url,
-                    method: 'POST',
-                    headers: {
-                        'Accept': 'application/json',
-                        'user-key': igdbKey,
-                        "X-Requested-With": "XMLHttpRequest"
-                    },
-                    data: `fields name, cover.url, screenshots.url, release_dates.date; sort popularity desc; where themes!= (42) & name~"${str}"*; limit 50;`
-                });
-                return response.data.length === 0 ? [] : this._mappedGames(response.data);
+                return await this.igdbService.executeIgdbQuery(str, true, 100, token)
             } catch (err) {
                 throw new ForbiddenException(ERROR_TYPES.unable_to_execute_igdb_query(err))
             }
         }
     }
 
-    /**
-     * Map IGDB games to CreateGameDTO
-     * @param games
-     * @private
-     */
-    private _mappedGames(games): CreateGameDto[] {
-        return games
-            .filter((game) => {
-                return game.release_dates && game.cover && game.screenshots;
-            })
-            .map((game) => {
-                const result = {
-                    ...game,
-                    igdbId: game.id,
-                    cover: game.cover && game.cover.url.replace('/t_thumb/', '/t_cover_big/').replace('//', 'https://'),
-                    screenshot: game.screenshots && game.screenshots.length && game.screenshots[game.screenshots.length - 1].url.replace('/t_thumb/', '/t_screenshot_big/').replace('//', 'https://'),
-                    releaseDate: game.release_dates && new Date(Math.min(...game.release_dates && game.release_dates.map((release_date) => {
-                            return release_date.date;
-                        })
-                            .filter((date) => {
-                                return date != null;
-                            })
-                    ) * 1000)
-                };
-                delete result.release_dates;
-                delete result.screenshots;
-                delete game.id;
-                return result;
-            })
-    }
 
     /**
      * Parse description containing games to remove all useless strings and chars

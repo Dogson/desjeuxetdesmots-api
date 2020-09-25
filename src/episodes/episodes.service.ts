@@ -34,20 +34,28 @@ export class EpisodesService {
      * Generate all episodes from a RSS feed URL
      */
     async generateEpisodes(feedUrl, config) {
+        let generatedEpisodes = [];
         try {
-            const generatedEpisodes = await parseRssMedia(feedUrl, config);
-            const episodes = await this.episodeModel.insertMany(generatedEpisodes);
-            this._generateGamesForAllEpisodes(episodes, config);
-            return episodes.map(ep => ep.toResponseObject());
+            generatedEpisodes = await parseRssMedia(feedUrl, config);
         } catch (err) {
-            if (err && err.code === 11000) {
-                throw new ForbiddenException(ERROR_TYPES.duplicate_key(JSON.stringify(err.keyValue)));
-            }
-            if (err && err.error) {
-                throw err;
-            }
             throw new InternalServerErrorException(ERROR_TYPES.wrong_rss_format(err))
         }
+        const episodes = [];
+        await asyncForEach(generatedEpisodes, async (generatedEp) => {
+            const episode = await this.findByName(generatedEp.name);
+            if (!episode) {
+                const inserted = await this.episodeModel.create(generatedEp);
+                episodes.push(inserted);
+            }
+        });
+
+        try {
+            await this._generateGamesForAllEpisodes(episodes, config);
+        } catch (err) {
+            throw new InternalServerErrorException(ERROR_TYPES.unable_to_parse_games(err));
+        }
+
+        return episodes.map(ep => ep.toResponseObject());
     }
 
 
