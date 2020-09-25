@@ -201,7 +201,7 @@ export class GameGenerationService {
                         'user-key': igdbKey,
                         "X-Requested-With": "XMLHttpRequest"
                     },
-                    data: `fields name, cover.url, screenshots.url, release_dates.date; sort popularity desc; where themes!= (42) & name~"${str}"* & popularity > 1; limit 50;`
+                    data: `fields name, cover.url, screenshots.url, release_dates.date; sort popularity desc; where themes!= (42) & name~"${str}"*; limit 50;`
                 });
                 return response.data.length === 0 ? [] : this._mappedGames(response.data);
             } catch (err) {
