@@ -1,17 +1,13 @@
-import {
-    ForbiddenException, forwardRef, Inject,
-    Injectable, InternalServerErrorException, Logger
-} from "@nestjs/common";
+import {ForbiddenException, forwardRef, Inject, Injectable, InternalServerErrorException, Logger} from "@nestjs/common";
 import {CreateGameDto, GameResponseObject} from "../games/dto/games.dto";
 import {InjectModel} from "@nestjs/mongoose";
-import {Model} from "mongoose";
+import {Model, Types} from "mongoose";
 import {Game} from "../games/model/games.model";
 import {GamesService} from "../games/games.service";
 import {ERROR_TYPES} from "../shared/const/error.types";
 import {asyncForEach} from "../shared/utils/utils";
 import {Episode} from "../episodes/model/episodes.model";
 import {MediaConfig} from "../episodes/model/media.model";
-import {Types} from "mongoose";
 import {IgdbService} from "../igdb/igdb.service";
 
 @Injectable()
@@ -103,20 +99,9 @@ export class GameGenerationService {
      * @private
      */
     private async _getVideoGamesFromString(str: string, mediaConfig: MediaConfig): Promise<CreateGameDto[]> {
-        let games: CreateGameDto[] = [];
-        let ignoreEpisode = false;
-        mediaConfig.ignoreEpisode.forEach((ignoreStr) => {
-            if (str.indexOf(ignoreStr) > -1) {
-                ignoreEpisode = true;
-            }
-        });
-        if (ignoreEpisode) {
-            return [];
-        }
         str = this._parseDescription(str, mediaConfig);
         const words = str.split(/\s+/);
-        games = await this._getGamesFromArray(words);
-        return games;
+        return await this._getGamesFromArray(words);
     }
 
     /**

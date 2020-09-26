@@ -29,14 +29,25 @@ export async function parseRssMedia(feedUrl: string, config: MediaConfig): Promi
             config: config
         };
     })
-        .filter(filterEpisodes);
+        .filter((episode) => {return filterEpisodes(episode, config)});
 }
 
 /**
  * Filter out episodes with wrong format
  * @param episode
+ * @param config
  */
-function filterEpisodes(episode: CreateEpisodeDto): boolean {
+function filterEpisodes(episode: CreateEpisodeDto, config: MediaConfig): boolean {
+    let ignoreEpisode = false;
+    config.ignoreEpisode.forEach((ignoreStr) => {
+        if (episode[config.parseProperty].indexOf(ignoreStr) > -1) {
+            console.log("kekek");
+            ignoreEpisode = true;
+        }
+    });
+    if (ignoreEpisode) {
+       return false;
+    }
     if (!episode.fileUrl) {
         return false;
     }
