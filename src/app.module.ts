@@ -11,6 +11,8 @@ import { UsersModule } from './users/users.module';
 import { ConfigModule } from '@nestjs/config';
 import {EpisodesModule} from "./episodes/episodes.module";
 import { IgdbModule } from './igdb/igdb.module';
+import {ScheduleModule} from "@nestjs/schedule";
+import {TasksModule} from "./tasks/tasks.module";
 
 mongoose.set('useFindAndModify', false);
 mongoose.set('runValidators', true);
@@ -19,10 +21,12 @@ mongoose.set('runValidators', true);
     imports: [
         ConfigModule.forRoot({isGlobal: true}),
         MongooseModule.forRoot(process.env.CONNECTION_STRING),
+        ScheduleModule.forRoot(),
         GamesModule,
         EpisodesModule,
         UsersModule,
-        IgdbModule
+        IgdbModule,
+        TasksModule
     ],
     controllers: [
         AppController
