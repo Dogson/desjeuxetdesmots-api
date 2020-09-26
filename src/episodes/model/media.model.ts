@@ -34,6 +34,12 @@ export class Media extends mongoose.Document {
     })
     type: "podcast" | "video";
 
+    @Prop()
+    mediaConfig: MediaConfig;
+
+    @Prop()
+    feedUrl: string;
+
     toResponseObject: () => MediaResponseObject;
 }
 

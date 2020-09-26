@@ -245,6 +245,18 @@ export class EpisodesService {
         await episode.save();
     }
 
+    async findAllMedias() {
+        return this.episodeModel.aggregate([
+            {
+                $group: {
+                    _id: '$media.name',
+                    config: {'$first': '$media.config'},
+                    feedUrl: {'$first': '$media.feedUrl'}
+                }
+            }
+        ]).exec();
+    }
+
     private async _findById(id): Promise<Episode> {
         if (!isObjectId(id)) {
             throw new NotFoundException(ERROR_TYPES.not_found("episode"));
