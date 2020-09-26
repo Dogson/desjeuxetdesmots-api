@@ -24,7 +24,9 @@ export async function parseRssMedia(feedUrl: string, config: MediaConfig): Promi
                 name: feed.title,
                 logo: feed.image.url,
                 description: generateMediaDescription(feed.description, feedUrl),
-                type: "podcast"
+                type: "podcast",
+                config: config,
+                feedUrl: feedUrl
             },
             config: config
         };
@@ -41,7 +43,6 @@ function filterEpisodes(episode: CreateEpisodeDto, config: MediaConfig): boolean
     let ignoreEpisode = false;
     config.ignoreEpisode.forEach((ignoreStr) => {
         if (episode[config.parseProperty].indexOf(ignoreStr) > -1) {
-            console.log("kekek");
             ignoreEpisode = true;
         }
     });
