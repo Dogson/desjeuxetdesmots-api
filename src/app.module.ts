@@ -9,13 +9,11 @@ import {HttpErrorFilter} from "./shared/handler/http-error.filter";
 import {LoggingInterceptor} from "./shared/handler/logging.interceptor";
 import { UsersModule } from './users/users.module';
 import { ConfigModule } from '@nestjs/config';
-import dotenv = require('dotenv');
 import {EpisodesModule} from "./episodes/episodes.module";
 import { IgdbModule } from './igdb/igdb.module';
 
 mongoose.set('useFindAndModify', false);
 mongoose.set('runValidators', true);
-dotenv.config({path: "../.env.local"});
 
 @Module({
     imports: [
