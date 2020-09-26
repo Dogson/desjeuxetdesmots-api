@@ -13,6 +13,8 @@ import {EpisodesModule} from "./episodes/episodes.module";
 import { IgdbModule } from './igdb/igdb.module';
 import {ScheduleModule} from "@nestjs/schedule";
 import {TasksModule} from "./tasks/tasks.module";
+import {MailerModule} from "@nestjs-modules/mailer";
+import {HandlebarsAdapter} from "@nestjs-modules/mailer/dist/adapters/handlebars.adapter";
 
 mongoose.set('useFindAndModify', false);
 mongoose.set('runValidators', true);
@@ -22,6 +24,27 @@ mongoose.set('runValidators', true);
         ConfigModule.forRoot({isGlobal: true}),
         MongooseModule.forRoot(process.env.CONNECTION_STRING),
         ScheduleModule.forRoot(),
+        MailerModule.forRoot({
+            transport: {
+                host: process.env.SMTP_HOST,
+                port: process.env.SMTP_PORT,
+                secure: false, // upgrade later with STARTTLS
+                auth: {
+                    user: process.env.SMTP_USERNAME,
+                    pass: process.env.SMTP_PASSWORD
+                },
+            },
+            defaults: {
+                from:`"${process.env.SMTP_FROM_NAME}" <${process.env.SMTP_FROM_ADDRESS}>`,
+            },
+            template: {
+                dir: './templates',
+                adapter: new HandlebarsAdapter(),
+                options: {
+                    strict: true,
+                },
+            },
+        }),
         GamesModule,
         EpisodesModule,
         UsersModule,

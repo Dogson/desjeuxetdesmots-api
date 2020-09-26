@@ -2,23 +2,20 @@ import {forwardRef, Inject, Injectable, Logger} from "@nestjs/common";
 import {Cron, CronExpression} from "@nestjs/schedule";
 import {EpisodesService} from "../episodes/episodes.service";
 import {asyncForEach} from "../shared/utils/utils";
+import {MailerService} from "@nestjs-modules/mailer";
 
 @Injectable()
 export class TasksService {
     private logger = new Logger("TasksService");
-    private isCroning = false;
 
     constructor(
-        @Inject(forwardRef(() => EpisodesService)) private readonly episodesService: EpisodesService
+        @Inject(forwardRef(() => EpisodesService)) private readonly episodesService: EpisodesService,
+        private readonly mailerService: MailerService
     ) {
     }
 
-    @Cron(CronExpression.EVERY_1ST_DAY_OF_MONTH_AT_MIDNIGHT)
-    async handleCron() {
-        if (this.isCroning) {
-            return;
-        }
-        this.isCroning = true;
+    @Cron(CronExpression.EVERY_DAY_AT_3PM)
+    async cronGenerateEpisodes() {
         const medias = await this.episodesService.findAllMedias();
         const generatedEpisodes = [];
         await asyncForEach(medias, async (media) => {
@@ -28,10 +25,21 @@ export class TasksService {
                 generatedEpisodes.push(episode);
             });
         });
-        this.logger.log(`${generatedEpisodes.length} episodes générés : `);
-        generatedEpisodes.forEach((episode, index) => {
-            this.logger.log(`${index}. ${episode.name} - ${episode.games.length} games generated.`);
-        });
-        this.isCroning = false;
+        this.logger.log(`${generatedEpisodes.length} episodes générés`);
+
+        if (generatedEpisodes.length > 0) {
+            await this
+                .mailerService
+                .sendMail({
+                    to: process.env.ADMIN_RECIPIENT,
+                    subject: `🥃 Gamer JUICE 🎮 - ${generatedEpisodes.length} episode(s) ont été généré(s) - En attente de vérification `,
+                    template: 'newEpisodes',
+                    context: {
+                        nbEpisodes: generatedEpisodes.length
+                    },
+                });
+
+            this.logger.log(`Mail sent`);
+        }
     }
 }
