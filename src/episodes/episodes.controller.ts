@@ -20,8 +20,8 @@ export class EpisodesController {
     @UseGuards(new AuthGuard())
     @UsePipes(new ValidationPipe())
     async generateEpisodes(@Body() generateEpisodesDto: GenerateEpisodesDto) {
-        const {config, feedUrl} = generateEpisodesDto;
-        return this.episodesService.generateEpisodes(feedUrl, config);
+        const {config, feedUrl, name} = generateEpisodesDto;
+        return this.episodesService.generateEpisodes(feedUrl, config, name);
     }
 
     /**

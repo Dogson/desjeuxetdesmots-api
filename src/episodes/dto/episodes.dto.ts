@@ -50,6 +50,7 @@ export class GenerateEpisodesDto {
     @IsString()
     readonly feedUrl: string;
     readonly config: MediaConfig;
+    readonly name?: string;
 }
 
 /**

@@ -8,8 +8,9 @@ import {MediaConfig} from "../model/media.model";
  * Return a media with a list of episodes parsed from a RSS feed
  * @param feedUrl
  * @param config
+ * @param name
  */
-export async function parseRssMedia(feedUrl: string, config: MediaConfig): Promise<CreateEpisodeDto[]> {
+export async function parseRssMedia(feedUrl: string, config: MediaConfig, name?: string): Promise<CreateEpisodeDto[]> {
     const parser = new Parser();
     const feed = await parser.parseURL(feedUrl);
 
@@ -17,7 +18,7 @@ export async function parseRssMedia(feedUrl: string, config: MediaConfig): Promi
        return filterEpisodeByMinDuration(entry, config.minDuration);
     }).map(function (entry) {
         return {
-            name: entry.title,
+            name: name || entry.title,
             image: entry.itunes.image || feed.image.url,
             description: generateEpisodeDescription(entry.itunes.summary, feedUrl),
             releaseDate: moment(entry.pubDate).toDate(),
@@ -63,8 +64,8 @@ function filterEpisodes(episode: CreateEpisodeDto, config: MediaConfig): boolean
 
 /**
  * Return false if episode isn't long enough
- * @param entry : episode feed
- * @param minDuration : min duration of episode
+ * @param entry episode feed
+ * @param minDuration min duration of episode
  */
 function filterEpisodeByMinDuration(entry: any, minDuration?: number) {
     if (!minDuration) {

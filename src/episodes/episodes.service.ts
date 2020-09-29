@@ -33,10 +33,10 @@ export class EpisodesService {
     /**
      * Generate all episodes from a RSS feed URL
      */
-    async generateEpisodes(feedUrl, config) {
+    async generateEpisodes(feedUrl: string, config: MediaConfig, name?: string) {
         let generatedEpisodes = [];
         try {
-            generatedEpisodes = await parseRssMedia(feedUrl, config);
+            generatedEpisodes = await parseRssMedia(feedUrl, config, name);
         } catch (err) {
             throw new InternalServerErrorException(ERROR_TYPES.wrong_rss_format(err))
         }
