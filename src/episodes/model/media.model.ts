@@ -8,7 +8,8 @@ export interface MediaConfig {
     excludeRegex: RegExp[],
     ignoreEpisode: string[],
     endOfParseStrings: string[],
-    parseProperty: string
+    parseProperty: string,
+    minDuration?: number
 }
 
 @Schema({_id: false, ...DEFAULT_SCHEMA_OPTIONS})

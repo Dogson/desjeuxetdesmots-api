@@ -13,7 +13,9 @@ export async function parseRssMedia(feedUrl: string, config: MediaConfig): Promi
     const parser = new Parser();
     const feed = await parser.parseURL(feedUrl);
 
-    return feed.items.map(function (entry) {
+    return feed.items.filter((entry) => {
+       return filterEpisodeByMinDuration(entry, config.minDuration);
+    }).map(function (entry) {
         return {
             name: entry.title,
             image: entry.itunes.image || feed.image.url,
@@ -57,6 +59,28 @@ function filterEpisodes(episode: CreateEpisodeDto, config: MediaConfig): boolean
 
     return episode.releaseDate >= moment(1325376).toDate();
 
+}
+
+/**
+ * Return false if episode isn't long enough
+ * @param entry : episode feed
+ * @param minDuration : min duration of episode
+ */
+function filterEpisodeByMinDuration(entry: any, minDuration?: number) {
+    if (!minDuration) {
+        return true;
+    }
+    const hms =  entry.itunes.duration;
+    if (hms) {
+        return true;
+    }
+    const units = hms.split(':');
+
+    const minutes = (+units[0]) * 60 + (+units[1]);
+    if (minutes < minDuration) {
+        console.log(entry.title);
+    }
+    return minutes >= minDuration;
 }
 
 /**
