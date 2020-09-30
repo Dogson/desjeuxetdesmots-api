@@ -9,8 +9,8 @@ import {
 import {InjectModel} from "@nestjs/mongoose";
 import _ = require("lodash");
 import {MediaConfig} from "./model/media.model";
-import {asyncForEach, isObjectId} from "../shared/utils/utils";
-import {ERROR_TYPES} from "../shared/const/error.types";
+import {asyncForEach, isObjectId} from "../../shared/utils/utils";
+import {ERROR_TYPES} from "../../shared/const/error.types";
 import {parseRssMedia} from "./helpers/rss.parser";
 import {Model} from "mongoose";
 import {Episode} from "./model/episodes.model";

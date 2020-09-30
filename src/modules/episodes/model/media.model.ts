@@ -1,5 +1,5 @@
 import {Prop, Schema, SchemaFactory} from '@nestjs/mongoose';
-import {DEFAULT_SCHEMA_OPTIONS} from "../../shared/const/schema.options";
+import {DEFAULT_SCHEMA_OPTIONS} from "../../../shared/const/schema.options";
 import {MediaResponseObject} from "../dto/media.dto";
 import * as mongoose from "mongoose";
 

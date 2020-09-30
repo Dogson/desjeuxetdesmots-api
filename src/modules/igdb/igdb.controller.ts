@@ -1,7 +1,7 @@
 import {Controller, Get, Query, UseGuards, UsePipes} from '@nestjs/common';
 import {IgdbService} from "./igdb.service";
-import {AuthGuard} from "../shared/handler/auth.guard";
-import {ValidationPipe} from "../shared/handler/validation.pipe";
+import {AuthGuard} from "../../shared/handler/auth.guard";
+import {ValidationPipe} from "../../shared/handler/validation.pipe";
 
 @Controller('igdb')
 export class IgdbController {

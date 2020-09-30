@@ -1,6 +1,6 @@
 import {forwardRef, Inject, Injectable, Logger} from "@nestjs/common";
 import {Cron, CronExpression} from "@nestjs/schedule";
-import {EpisodesService} from "../episodes/episodes.service";
+import {EpisodesService} from "../modules/episodes/episodes.service";
 import {asyncForEach} from "../shared/utils/utils";
 import {MailerService} from "@nestjs-modules/mailer";
 
