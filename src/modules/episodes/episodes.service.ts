@@ -32,6 +32,9 @@ export class EpisodesService {
 
     /**
      * Generate all episodes from a RSS feed URL
+     * @param feedUrl
+     * @param config
+     * @param name
      */
     async generateEpisodes(feedUrl: string, config: MediaConfig, name?: string) {
         let generatedEpisodes = [];
@@ -158,6 +161,11 @@ export class EpisodesService {
         }
     }
 
+    /**
+     * Add a game to the field games of an episode
+     * @param id
+     * @param gameId
+     */
     async pushGameToEpisode(id: string, gameId: string) {
         if (!isObjectId(id)) {
             throw new NotFoundException(ERROR_TYPES.not_found("episode"));
@@ -178,6 +186,7 @@ export class EpisodesService {
 
     /**
      * Find all episodes from query
+     * @param query
      */
     async findAll(query): Promise<EpisodeResponseObject[]> {
         const {page, limit, ...search} = query;
@@ -208,6 +217,10 @@ export class EpisodesService {
         return episode.toResponseObject();
     }
 
+    /**
+     * find one episode by name
+     * @param name
+     */
     async findByName(name: string): Promise<Episode> {
         let episode;
         try {
@@ -232,6 +245,10 @@ export class EpisodesService {
         }
     }
 
+    /**
+     * Delete many episode (must be given a filter)
+     * @param deleteDto
+     */
     async deleteMany(deleteDto): Promise<any> {
         if (!deleteDto || _.isEmpty(deleteDto)) {
             throw new BadRequestException(ERROR_TYPES.validation_no_body);
@@ -240,11 +257,19 @@ export class EpisodesService {
 
     }
 
+    /**
+     * Remove one game from an episode
+     * @param gameToRemove
+     * @param episode
+     */
     async removeGameFromEpisode(gameToRemove, episode) {
         episode.games = episode.games.filter(game => game.toString() !== gameToRemove.toString());
         await episode.save();
     }
 
+    /**
+     * Find all media without duplicate
+     */
     async findAllMedias() {
         return this.episodeModel.aggregate([
             {
@@ -257,6 +282,11 @@ export class EpisodesService {
         ]).exec();
     }
 
+    /**
+     * Find episode by id
+     * @param id
+     * @private
+     */
     private async _findById(id): Promise<Episode> {
         if (!isObjectId(id)) {
             throw new NotFoundException(ERROR_TYPES.not_found("episode"));
@@ -286,7 +316,11 @@ export class EpisodesService {
         this.logger.log("All games have been generated for this media");
     }
 
-
+    /**
+     * Get game objects for episode
+     * @param episode
+     * @private
+     */
     private async _getGamesForEpisode(episode) {
         const gamesId = episode.games;
         const games = [];
