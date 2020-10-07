@@ -5,19 +5,18 @@ import {
     Injectable, InternalServerErrorException, Logger,
     NotFoundException
 } from "@nestjs/common";
-
 import {InjectModel} from "@nestjs/mongoose";
 import _ = require("lodash");
 import {MediaConfig} from "./model/media.model";
-import {asyncForEach, isObjectId} from "../shared/utils/utils";
-import {ERROR_TYPES} from "../shared/const/error.types";
-import {parseRssMedia} from "./helpers/rss.parser";
+import {asyncForEach, isObjectId} from "../../shared/utils/utils";
+import {ERROR_TYPES} from "../../shared/const/error.types";
 import {Model} from "mongoose";
 import {Episode} from "./model/episodes.model";
 import {GameGenerationService} from "../game-generation/game-generation.service";
-import {CreateEpisodeDto, EpisodeResponseObject, UpdateEpisodeDto} from "./dto/episodes.dto";
+import {CreateEpisodeDto, EpisodeDto, EpisodeResponseObject, UpdateEpisodeDto} from "./dto/episodes.dto";
 import {Types} from "mongoose";
 import {GamesService} from "../games/games.service";
+import {EpisodeGenerationService} from "../episode-generation/episode-generation.service";
 
 @Injectable()
 export class EpisodesService {
@@ -26,19 +25,31 @@ export class EpisodesService {
     constructor(
         @InjectModel('Episode') private readonly episodeModel: Model<Episode>,
         private readonly gameGenerationService: GameGenerationService,
-        @Inject(forwardRef(() => GamesService)) private readonly gamesService: GamesService
+        @Inject(forwardRef(() => GamesService)) private readonly gamesService: GamesService,
+        private readonly episodeGenerationService: EpisodeGenerationService
     ) {
     }
 
     /**
      * Generate all episodes from a RSS feed URL
+     * @param feedUrl
+     * @param config
+     * @param type
+     * @param logo
+     * @param name
+     * @param description
+     * @param youtubeId
      */
-    async generateEpisodes(feedUrl: string, config: MediaConfig, name?: string) {
-        let generatedEpisodes = [];
-        try {
-            generatedEpisodes = await parseRssMedia(feedUrl, config, name);
-        } catch (err) {
-            throw new InternalServerErrorException(ERROR_TYPES.wrong_rss_format(err))
+    async generateEpisodes(feedUrl: string, config: MediaConfig, type: string, logo?: string, name?: string, description?: string, youtubeId?: string) {
+        let generatedEpisodes: EpisodeDto[] = [];
+        if (youtubeId) {
+            generatedEpisodes = await this.episodeGenerationService.generateYoutubeEpisodes(feedUrl, config, youtubeId, name);
+        } else {
+            try {
+                generatedEpisodes = await this.episodeGenerationService.parseRssMedia(feedUrl, config, type, logo, description, name);
+            } catch (err) {
+                throw new InternalServerErrorException(ERROR_TYPES.wrong_rss_format(err))
+            }
         }
         const episodes = [];
         await asyncForEach(generatedEpisodes, async (generatedEp) => {
@@ -158,6 +169,11 @@ export class EpisodesService {
         }
     }
 
+    /**
+     * Add a game to the field games of an episode
+     * @param id
+     * @param gameId
+     */
     async pushGameToEpisode(id: string, gameId: string) {
         if (!isObjectId(id)) {
             throw new NotFoundException(ERROR_TYPES.not_found("episode"));
@@ -178,6 +194,7 @@ export class EpisodesService {
 
     /**
      * Find all episodes from query
+     * @param query
      */
     async findAll(query): Promise<EpisodeResponseObject[]> {
         const {page, limit, ...search} = query;
@@ -208,6 +225,10 @@ export class EpisodesService {
         return episode.toResponseObject();
     }
 
+    /**
+     * find one episode by name
+     * @param name
+     */
     async findByName(name: string): Promise<Episode> {
         let episode;
         try {
@@ -232,6 +253,10 @@ export class EpisodesService {
         }
     }
 
+    /**
+     * Delete many episode (must be given a filter)
+     * @param deleteDto
+     */
     async deleteMany(deleteDto): Promise<any> {
         if (!deleteDto || _.isEmpty(deleteDto)) {
             throw new BadRequestException(ERROR_TYPES.validation_no_body);
@@ -240,23 +265,39 @@ export class EpisodesService {
 
     }
 
+    /**
+     * Remove one game from an episode
+     * @param gameToRemove
+     * @param episode
+     */
     async removeGameFromEpisode(gameToRemove, episode) {
         episode.games = episode.games.filter(game => game.toString() !== gameToRemove.toString());
         await episode.save();
     }
 
+    /**
+     * Find all media without duplicate
+     */
     async findAllMedias() {
         return this.episodeModel.aggregate([
             {
                 $group: {
                     _id: '$media.name',
                     config: {'$first': '$media.config'},
-                    feedUrl: {'$first': '$media.feedUrl'}
+                    feedUrl: {'$first': '$media.feedUrl'},
+                    type: {'$first': '$media.type'},
+                    logo: {'$first': '$media.logo'},
+                    description: {'$first': '$media.description'},
                 }
             }
         ]).exec();
     }
 
+    /**
+     * Find episode by id
+     * @param id
+     * @private
+     */
     private async _findById(id): Promise<Episode> {
         if (!isObjectId(id)) {
             throw new NotFoundException(ERROR_TYPES.not_found("episode"));
@@ -286,7 +327,11 @@ export class EpisodesService {
         this.logger.log("All games have been generated for this media");
     }
 
-
+    /**
+     * Get game objects for episode
+     * @param episode
+     * @private
+     */
     private async _getGamesForEpisode(episode) {
         const gamesId = episode.games;
         const games = [];
@@ -302,5 +347,4 @@ export class EpisodesService {
         });
         return games;
     }
-
 }

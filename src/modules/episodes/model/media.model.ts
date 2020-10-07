@@ -1,15 +1,16 @@
 import {Prop, Schema, SchemaFactory} from '@nestjs/mongoose';
-import {DEFAULT_SCHEMA_OPTIONS} from "../../shared/const/schema.options";
+import {DEFAULT_SCHEMA_OPTIONS} from "../../../shared/const/schema.options";
 import {MediaResponseObject} from "../dto/media.dto";
 import * as mongoose from "mongoose";
 
 export interface MediaConfig {
-    excludeStrings: string[],
-    excludeRegex: RegExp[],
-    ignoreEpisode: string[],
-    endOfParseStrings: string[],
-    parseProperty: string,
+    excludeStrings?: string[],
+    excludeRegex?: RegExp[],
+    ignoreEpisode?: string[],
+    endOfParseStrings?: string[],
+    parseProperty?: string,
     minDuration?: number
+    ignoreEpisodeRegex?: RegExp[],
 }
 
 @Schema({_id: false, ...DEFAULT_SCHEMA_OPTIONS})
@@ -36,7 +37,7 @@ export class Media extends mongoose.Document {
     type: "podcast" | "video";
 
     @Prop()
-    mediaConfig: MediaConfig;
+    config: MediaConfig;
 
     @Prop()
     feedUrl: string;

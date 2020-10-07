@@ -1,6 +1,6 @@
 import {forwardRef, Inject, Injectable, Logger} from "@nestjs/common";
 import {Cron, CronExpression} from "@nestjs/schedule";
-import {EpisodesService} from "../episodes/episodes.service";
+import {EpisodesService} from "../modules/episodes/episodes.service";
 import {asyncForEach} from "../shared/utils/utils";
 import {MailerService} from "@nestjs-modules/mailer";
 
@@ -14,13 +14,15 @@ export class TasksService {
     ) {
     }
 
-    @Cron(CronExpression.EVERY_DAY_AT_3PM)
+    @Cron(CronExpression.EVERY_6_HOURS)
     async cronGenerateEpisodes() {
+        this.logger.log("Starting episode population task.")
         const medias = await this.episodesService.findAllMedias();
         const generatedEpisodes = [];
+
         await asyncForEach(medias, async (media) => {
-            const {feedUrl, config, name} = media;
-            const episodes = await this.episodesService.generateEpisodes(feedUrl, config, name);
+            const {feedUrl, config, type, name, logo, description} = media;
+            const episodes = await this.episodesService.generateEpisodes(feedUrl, config, type, logo, name, description);
             episodes.forEach((episode) => {
                 generatedEpisodes.push(episode);
             });

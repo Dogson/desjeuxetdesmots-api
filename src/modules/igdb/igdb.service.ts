@@ -1,5 +1,5 @@
 import {BadRequestException, Injectable} from '@nestjs/common';
-import {ERROR_TYPES} from "../shared/const/error.types";
+import {ERROR_TYPES} from "../../shared/const/error.types";
 import axios from "axios";
 import {CreateGameDto} from "../games/dto/games.dto";
 

@@ -1,6 +1,6 @@
 import {Prop, Schema, SchemaFactory} from '@nestjs/mongoose';
-import {DEFAULT_SCHEMA_OPTIONS} from "../../shared/const/schema.options";
-import {DefaultModel} from "../../shared/const/default.model";
+import {DEFAULT_SCHEMA_OPTIONS} from "../../../shared/const/schema.options";
+import {DefaultModel} from "../../../shared/const/default.model";
 import {GameResponseObject} from "../dto/games.dto";
 import {Types} from "mongoose";
 

@@ -1,10 +1,10 @@
 import {Body, Controller, Delete, Get, Logger, Param, Post, Put, Query, UseGuards, UsePipes} from '@nestjs/common';
 import {EpisodesService} from "./episodes.service";
 import {CreateEpisodeDto, GenerateEpisodesDto, EpisodeResponseObject, UpdateEpisodeDto} from "./dto/episodes.dto";
-import {ValidationPipe} from "../shared/handler/validation.pipe";
-import {IDefaultQuery} from "../shared/const/default.query.interface";
+import {ValidationPipe} from "../../shared/handler/validation.pipe";
+import {IDefaultQuery} from "../../shared/const/default.query.interface";
 import {DEFAULT_EPISODE_QUERY} from "./query/episodes.query";
-import {AuthGuard} from "../shared/handler/auth.guard";
+import {AuthGuard} from "../../shared/handler/auth.guard";
 
 @Controller('episodes')
 export class EpisodesController {
@@ -20,8 +20,8 @@ export class EpisodesController {
     @UseGuards(new AuthGuard())
     @UsePipes(new ValidationPipe())
     async generateEpisodes(@Body() generateEpisodesDto: GenerateEpisodesDto) {
-        const {config, feedUrl, name} = generateEpisodesDto;
-        return this.episodesService.generateEpisodes(feedUrl, config, name);
+        const {config, feedUrl, type, name, logo, description, youtubeId} = generateEpisodesDto;
+        return this.episodesService.generateEpisodes(feedUrl, config, type, logo, name, description, youtubeId);
     }
 
     /**

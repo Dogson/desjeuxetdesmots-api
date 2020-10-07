@@ -1,7 +1,7 @@
 import {Module} from '@nestjs/common';
 import {AppController} from './app.controller';
 import {AppService} from './app.service';
-import {GamesModule} from "./games/games.module";
+import {GamesModule} from "./modules/games/games.module";
 import {MongooseModule} from "@nestjs/mongoose";
 import * as mongoose from "mongoose";
 import {APP_FILTER, APP_INTERCEPTOR} from "@nestjs/core";
@@ -9,12 +9,14 @@ import {HttpErrorFilter} from "./shared/handler/http-error.filter";
 import {LoggingInterceptor} from "./shared/handler/logging.interceptor";
 import { UsersModule } from './users/users.module';
 import { ConfigModule } from '@nestjs/config';
-import {EpisodesModule} from "./episodes/episodes.module";
-import { IgdbModule } from './igdb/igdb.module';
+import {EpisodesModule} from "./modules/episodes/episodes.module";
+import { IgdbModule } from './modules/igdb/igdb.module';
 import {ScheduleModule} from "@nestjs/schedule";
 import {TasksModule} from "./tasks/tasks.module";
 import {MailerModule} from "@nestjs-modules/mailer";
 import {HandlebarsAdapter} from "@nestjs-modules/mailer/dist/adapters/handlebars.adapter";
+import {GameGenerationModule} from "./modules/game-generation/game-generation.module";
+import {EpisodeGenerationModule} from "./modules/episode-generation/episode-generation.module";
 
 mongoose.set('useFindAndModify', false);
 mongoose.set('runValidators', true);
@@ -47,6 +49,8 @@ mongoose.set('runValidators', true);
         }),
         GamesModule,
         EpisodesModule,
+        GameGenerationModule,
+        EpisodeGenerationModule,
         UsersModule,
         IgdbModule,
         TasksModule

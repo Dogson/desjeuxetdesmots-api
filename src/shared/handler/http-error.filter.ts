@@ -4,7 +4,7 @@ import {ArgumentsHost, Catch, ExceptionFilter, HttpException, Logger} from "@nes
  * Class generating sexier HTTP errors
  * Injected in app modules dependencies
  */
-@Catch()
+@Catch(HttpException)
 export class HttpErrorFilter implements ExceptionFilter {
     catch(exception: HttpException, host: ArgumentsHost) {
         const ctx = host.switchToHttp();
