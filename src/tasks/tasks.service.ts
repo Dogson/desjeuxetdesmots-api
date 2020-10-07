@@ -19,9 +19,10 @@ export class TasksService {
         this.logger.log("Starting episode population task.")
         const medias = await this.episodesService.findAllMedias();
         const generatedEpisodes = [];
+
         await asyncForEach(medias, async (media) => {
-            const {feedUrl, config, type, name} = media;
-            const episodes = await this.episodesService.generateEpisodes(feedUrl, config, type, name);
+            const {feedUrl, config, type, name, logo, description} = media;
+            const episodes = await this.episodesService.generateEpisodes(feedUrl, config, type, logo, name, description);
             episodes.forEach((episode) => {
                 generatedEpisodes.push(episode);
             });

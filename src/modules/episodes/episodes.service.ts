@@ -35,16 +35,18 @@ export class EpisodesService {
      * @param feedUrl
      * @param config
      * @param type
+     * @param logo
      * @param name
+     * @param description
      * @param youtubeId
      */
-    async generateEpisodes(feedUrl: string, config: MediaConfig, type: string, name?: string, youtubeId?: string) {
+    async generateEpisodes(feedUrl: string, config: MediaConfig, type: string, logo?: string, name?: string, description?: string, youtubeId?: string) {
         let generatedEpisodes: EpisodeDto[] = [];
         if (youtubeId) {
             generatedEpisodes = await this.episodeGenerationService.generateYoutubeEpisodes(feedUrl, config, youtubeId, name);
         } else {
             try {
-                generatedEpisodes = await this.episodeGenerationService.parseRssMedia(feedUrl, config, type, name);
+                generatedEpisodes = await this.episodeGenerationService.parseRssMedia(feedUrl, config, type, logo, description, name);
             } catch (err) {
                 throw new InternalServerErrorException(ERROR_TYPES.wrong_rss_format(err))
             }
@@ -283,7 +285,9 @@ export class EpisodesService {
                     _id: '$media.name',
                     config: {'$first': '$media.config'},
                     feedUrl: {'$first': '$media.feedUrl'},
-                    type: {'$first': '$media.type'}
+                    type: {'$first': '$media.type'},
+                    logo: {'$first': '$media.logo'},
+                    description: {'$first': '$media.description'},
                 }
             }
         ]).exec();

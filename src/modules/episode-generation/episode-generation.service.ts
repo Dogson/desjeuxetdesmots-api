@@ -13,8 +13,20 @@ import {asyncForEach} from "../../shared/utils/utils";
 @Injectable()
 export class EpisodeGenerationService {
 
-    async parseRssMedia(feedUrl: string, config: MediaConfig, type: string, name?: string): Promise<EpisodeDto[]> {
-        const parser = new Parser();
+    async parseRssMedia(feedUrl: string, config: MediaConfig, type: string, logo?: string, description?: string, name?: string): Promise<EpisodeDto[]> {
+        let parser = new Parser();
+        if (type === "video") {
+            parser = new Parser({
+                    customFields: {
+                        item: [
+                            ['media:group', 'mediaGroup'],
+                            ['published', 'pubDate']
+                        ]
+                    }
+                }
+            );
+        }
+
         const feed = await parser.parseURL(feedUrl);
         // eslint-disable-next-line @typescript-eslint/no-this-alias
         const _this = this;
@@ -23,20 +35,21 @@ export class EpisodeGenerationService {
             return this._filterEpisodeByMinDuration(entry, config.minDuration);
         }).map(function (entry) {
             return {
-                name: name || entry.title,
-                image: entry.itunes.image || feed.image.url,
-                description: _this._generateEpisodeDescription(entry.itunes.summary, feedUrl),
+                name: entry.title,
+                image: type === "video" ? entry.mediaGroup["media:thumbnail"][0].$.url : entry.itunes.image || feed.image.url,
+                description: type === "video" ? entry.mediaGroup["media:description"][0] : _this._generateEpisodeDescription(entry.itunes.summary, feedUrl),
                 releaseDate: moment(entry.pubDate).toDate(),
-                fileUrl: entry.enclosure.url,
+                fileUrl: type === "video" ? entry.link : entry.enclosure.url,
                 media: {
-                    name: feed.title,
-                    logo: feed.image.url,
-                    description: _this._generateMediaDescription(feed.description, feedUrl),
+                    name: name || feed.title,
+                    logo: logo || feed.image.url,
+                    description: description || _this._generateMediaDescription(feed.description, feedUrl),
                     type: type,
                     config: config,
                     feedUrl: feedUrl
                 }
             };
+
         })
             .filter((episode: EpisodeDto) => {
                 return this._filterEpisodes(episode, config)

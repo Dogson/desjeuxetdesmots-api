@@ -52,6 +52,8 @@ export class GenerateEpisodesDto {
     readonly config: MediaConfig;
     readonly type: "podcast" | "video";
     readonly name?: string;
+    readonly logo?: string;
+    readonly description?: string;
     readonly youtubeId?: string;
 }
 
