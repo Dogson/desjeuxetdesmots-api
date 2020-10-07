@@ -79,4 +79,10 @@ export const ERROR_TYPES = {
             message: `An error occured while trying to get the IGDB access token from twitch : ${err}`
         }
     },
+    youtube_request_error: (err) => {
+        return {
+            error: "youtube_request_error",
+            message: `An error occured while requesting Youtube API : ${err}`
+        }
+    }
 };

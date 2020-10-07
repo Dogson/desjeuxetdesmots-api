@@ -5,6 +5,7 @@ import {EpisodesService} from "./episodes.service";
 import {GameGenerationModule} from "../game-generation/game-generation.module";
 import {EpisodesController} from "./episodes.controller";
 import {GamesModule} from "../games/games.module";
+import {EpisodeGenerationModule} from "../episode-generation/episode-generation.module";
 
 
 @Module({
@@ -15,6 +16,7 @@ import {GamesModule} from "../games/games.module";
         }]),
         forwardRef(() => GamesModule),
         forwardRef(() => GameGenerationModule),
+        EpisodeGenerationModule
     ],
     controllers: [EpisodesController],
     providers: [EpisodesService],

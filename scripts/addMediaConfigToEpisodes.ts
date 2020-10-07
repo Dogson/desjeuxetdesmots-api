@@ -11,44 +11,17 @@ export async function addMediaConfigToEpisode() {
     const db = await client.db("gamerjuice");
 
 
-    await db.collection("episodes").updateMany({"media.name": "Le Cosy Corner"}, {
+    await db.collection("episodes").updateMany({"media.name": "Gamekult"}, {
         "$set": {
             "media.config": {
-                "excludeStrings": ["où il est entre autres question de", "où il est entre autre question de", "Le cosy corner numéro", "cosy corner", "le cosy corner", "Un épisode où il est entre autres question de"],
+                "excludeStrings": ["Gamekult l'émission", "by Gamekult Jeux Vidéo"],
                 "excludeRegex": [],
-                "ignoreEpisode": ["Zone de Confort", "[HS]"],
-                "endOfParseStrings": ["Remerciements", "Playlist"],
-                "parseProperty": "description"
-            },
-            "media.feedUrl": "https://feeds.soundcloud.com/users/soundcloud:users:274829367/sounds.rss"
-        },
-        "$unset": {feedUrl: 1}
-    });
-    await db.collection("episodes").updateMany({"media.name": "Silence on joue !"}, {
-        "$set": {
-            "media.config": {
-                "excludeStrings": ["Silence On Joue"],
-                "excludeRegex": [],
-                "ignoreEpisode": [],
+                "ignoreEpisode": ["Point News", "Gaijin", "Retro Dash", "Presse au kult"],
                 "endOfParseStrings": [],
-                "parseProperty": "name"
+                "parseProperty": "name",
+                "minDuration": 75
             },
-            "media.feedUrl": "https://feeds.acast.com/public/shows/5b7ac427c6a58e726f576cff"
-        },
-        "$unset": {feedUrl: 1}
-    });
-    await db.collection("episodes").updateMany({"media.name": "Fin Du Game"}, {
-        "$set": {
-            "media.config": {
-                "excludeStrings": ["Episode"],
-                "excludeRegex": [],
-                "ignoreEpisode": [],
-                "endOfParseStrings": [],
-                "parseProperty": "name"
-            },
-            "media.feedUrl": "https://feeds.acast.com/public/shows/findugame"
-        },
-        "$unset": {feedUrl: 1}
+        }
     });
 
     await client.close();

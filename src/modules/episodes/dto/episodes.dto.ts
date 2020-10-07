@@ -1,6 +1,6 @@
 import {IsString, IsOptional, IsUrl, IsDateString, IsBoolean} from "class-validator";
 import {Types} from "mongoose";
-import {MediaResponseObject} from "./media.dto";
+import {MediaDto, MediaResponseObject} from "./media.dto";
 import {MediaConfig} from "../model/media.model";
 
 /**
@@ -50,7 +50,23 @@ export class GenerateEpisodesDto {
     @IsString()
     readonly feedUrl: string;
     readonly config: MediaConfig;
+    readonly type: "podcast" | "video";
     readonly name?: string;
+    readonly youtubeId?: string;
+}
+
+export class EpisodeDto {
+    @IsString()
+    readonly name: string;
+    @IsUrl()
+    readonly image: string;
+    @IsString()
+    readonly description: string;
+    @IsUrl()
+    readonly fileUrl: string;
+    @IsDateString()
+    readonly releaseDate: Date;
+    readonly media: MediaDto;
 }
 
 /**

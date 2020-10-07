@@ -15,6 +15,8 @@ import {ScheduleModule} from "@nestjs/schedule";
 import {TasksModule} from "./tasks/tasks.module";
 import {MailerModule} from "@nestjs-modules/mailer";
 import {HandlebarsAdapter} from "@nestjs-modules/mailer/dist/adapters/handlebars.adapter";
+import {GameGenerationModule} from "./modules/game-generation/game-generation.module";
+import {EpisodeGenerationModule} from "./modules/episode-generation/episode-generation.module";
 
 mongoose.set('useFindAndModify', false);
 mongoose.set('runValidators', true);
@@ -47,6 +49,8 @@ mongoose.set('runValidators', true);
         }),
         GamesModule,
         EpisodesModule,
+        GameGenerationModule,
+        EpisodeGenerationModule,
         UsersModule,
         IgdbModule,
         TasksModule
