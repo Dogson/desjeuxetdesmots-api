@@ -6,7 +6,6 @@ import {MailerService} from "@nestjs-modules/mailer";
 
 @Injectable()
 export class TasksService {
-    private isCroning = false;
     private logger = new Logger("TasksService");
 
     constructor(
@@ -15,12 +14,8 @@ export class TasksService {
     ) {
     }
 
-    @Cron(CronExpression.EVERY_SECOND)
+    @Cron(CronExpression.EVERY_6_HOURS)
     async cronGenerateEpisodes() {
-        if (this.isCroning) {
-            return
-        }
-        this.isCroning = true;
         this.logger.log("Starting episode population task.")
         const medias = await this.episodesService.findAllMedias();
         const generatedEpisodes = [];
