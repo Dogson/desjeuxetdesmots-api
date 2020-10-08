@@ -27,7 +27,6 @@ export class GameGenerationService {
      * @param mediaConfig
      */
     public async fetchAndPopulateGames(episode: Episode, mediaConfig: MediaConfig) {
-        this.logger.log(`Starting populating game for episode : ${episode.name}`);
         const stringToParse = episode[mediaConfig.parseProperty];
         try {
             const games = await this._getVideoGamesFromString(stringToParse, mediaConfig);
@@ -59,7 +58,6 @@ export class GameGenerationService {
     public async createGameIfNotExists(game: CreateGameDto): Promise<GameResponseObject> {
         const existingGame = await this.gamesService.findByIgdbId(game.igdbId);
         if (existingGame) {
-            this.logger.log(`Skipped creation for game ${existingGame.name} : game already exists`);
             return existingGame.toResponseObject();
         }
 
@@ -88,7 +86,6 @@ export class GameGenerationService {
             }
         });
         episode.generatedGames = true;
-        this.logger.log(`Episode ${episode.name} has generated ${gamesId.length} games.`);
         await episode.save();
     }
 

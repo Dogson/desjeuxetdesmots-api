@@ -11,15 +11,18 @@ export async function addMediaConfigToEpisode() {
     const db = await client.db("gamerjuice");
 
 
-    await db.collection("episodes").updateMany({"media.name": "Gamekult"}, {
+    await db.collection("episodes").updateMany({"media.name": "GK Live"}, {
         "$set": {
             "media.config": {
-                "excludeStrings": ["Gamekult l'émission", "by Gamekult Jeux Vidéo"],
+                "episodeMustInclude": ["GK Live"],
+                "excludeStrings": [
+                    "GK Live Replay"
+                ],
                 "excludeRegex": [],
-                "ignoreEpisode": ["Point News", "Gaijin", "Retro Dash", "Presse au kult"],
+                "ignoreEpisode": [],
+                "ignoreEpisodeRegex": [],
                 "endOfParseStrings": [],
-                "parseProperty": "name",
-                "minDuration": 75
+                "parseProperty": "name"
             },
         }
     });

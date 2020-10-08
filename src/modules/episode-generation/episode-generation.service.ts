@@ -56,61 +56,61 @@ export class EpisodeGenerationService {
             });
     }
 
-    async generateYoutubeEpisodes(feedUrl: string, config: MediaConfig, youtubeId: string, name?: string): Promise<EpisodeDto[]> {
+    async generateYoutubeEpisodes(feedUrl: string, config: MediaConfig, youtubeChannelId: string, youtubePlaylistId?: string, name?: string): Promise<EpisodeDto[]> {
         let channelUrl = process.env.YOUTUBE_API_CHANNEL_URL;
-        channelUrl = channelUrl.replace("${channelId}", youtubeId);
+        channelUrl = channelUrl.replace("${channelId}", youtubeChannelId);
         channelUrl = channelUrl.replace("${apiKey}", process.env.YOUTUBE_API_KEY);
         const response = await axios.get(channelUrl);
         if (!response.data || !response.data.items && !response.data.items[0]) {
-            throw new InternalServerErrorException(ERROR_TYPES.youtube_request_error(`This channel does not exist : ${youtubeId}`));
+            throw new InternalServerErrorException(ERROR_TYPES.youtube_request_error(`This channel does not exist : ${youtubeChannelId}`));
         }
         const mediaInfos = response.data.items[0].snippet;
         feedUrl = process.env.YOUTUBE_RSS_URL;
-        feedUrl = feedUrl.replace("${channelId}", youtubeId);
+        feedUrl = feedUrl.replace("${channelId}", youtubeChannelId);
         const media: MediaDto = {
-            name: mediaInfos.title,
+            name: name || mediaInfos.title,
             logo: mediaInfos.thumbnails.medium.url,
-            description: mediaInfos.description,
+            description: mediaInfos.description || "",
             type: "video",
             config: config,
             feedUrl: feedUrl
         }
-        return await this._generateYoutubeEpisodePage([], null, media, youtubeId, name);
+        return await this._generateYoutubeEpisodePage([], null, media, youtubeChannelId, youtubePlaylistId, name);
     }
 
-    private async _generateYoutubeEpisodePage(episodes: EpisodeDto[], pageToken: string, media: MediaDto, youtubeId: string, name?: string): Promise<EpisodeDto[]> {
-        let url = process.env.YOUTUBE_API_SEARCH_URL;
+    private async _generateYoutubeEpisodePage(episodes: EpisodeDto[], pageToken: string, media: MediaDto, youtubeChannelId: string, youtubePlaylistId?: string, name?: string): Promise<EpisodeDto[]> {
+        let url;
+        if (youtubePlaylistId) {
+            url = process.env.YOUTUBE_API_PLAYLIST_URL.replace('${playlistId}', youtubePlaylistId);
+        } else {
+            url = process.env.YOUTUBE_API_SEARCH_URL.replace("${channelId}", youtubeChannelId);
+        }
         url = url.replace("${apiKey}", process.env.YOUTUBE_API_KEY);
-        url = url.replace("${channelId}", youtubeId);
         if (pageToken) {
             url += `&pageToken=${pageToken}`
         }
         try {
             const response = await axios.get(url);
-
-            if (response.data.items.length <= 0) {
-                return [];
-            }
             const nextPageToken = response.data.nextPageToken;
             await asyncForEach(response.data.items, async (video) => {
-                const id = video.id.videoId;
                 const videoInfos = video.snippet;
-
-                videoInfos.description = await this._getYoutubeVideoDescription(id);
-
+                const id = youtubePlaylistId ? videoInfos.resourceId.videoId : video.id.videoId;
+                videoInfos.description = await this._getYoutubeVideoDescription(id) || videoInfos.description;
                 const episode = {
                     name: decode(videoInfos.title),
-                    description: videoInfos.description,
+                    description: videoInfos.description || " ",
                     fileUrl: `https://www.youtube.com/watch?v=${id}`,
-                    image: videoInfos.thumbnails.medium.url,
+                    image: videoInfos.thumbnails.medium && videoInfos.thumbnails.medium.url,
                     releaseDate: moment(videoInfos.publishedAt).toDate(),
                     media: media
                 }
-                episodes.push(episode);
+                if (episode.image) {
+                    episodes.push(episode);
+                }
             })
 
             if (nextPageToken) {
-                await this._generateYoutubeEpisodePage(episodes, nextPageToken, media, youtubeId, name);
+                await this._generateYoutubeEpisodePage(episodes, nextPageToken, media, youtubeChannelId, youtubePlaylistId, name);
             }
             return episodes.filter((episode: EpisodeDto) => {
                 return this._filterEpisodes(episode, media.config)
@@ -133,8 +133,7 @@ export class EpisodeGenerationService {
         url = url.replace("${videoId}", videoId);
 
         const videoResponse = await axios.get(url);
-
-        return videoResponse.data.items[0].snippet.description;
+        return videoResponse.data.items[0] && videoResponse.data.items[0].snippet.description;
     }
 
     /**
@@ -145,7 +144,7 @@ export class EpisodeGenerationService {
     private _filterEpisodes(episode: EpisodeDto, config: MediaConfig): boolean {
         let ignoreEpisode = false;
         config.ignoreEpisode.forEach((ignoreStr) => {
-            if (episode[config.parseProperty].indexOf(ignoreStr) > -1) {
+            if (episode[config.parseProperty].toUpperCase().indexOf(ignoreStr.toUpperCase()) > -1) {
                 ignoreEpisode = true;
             }
         });
@@ -157,7 +156,7 @@ export class EpisodeGenerationService {
         })
 
         config.episodeMustInclude && config.episodeMustInclude.forEach((string) => {
-            if (episode[config.parseProperty].indexOf(string) === -1) {
+            if (episode[config.parseProperty].toUpperCase().indexOf(string.toUpperCase()) === -1) {
                 ignoreEpisode = true;
             }
         })

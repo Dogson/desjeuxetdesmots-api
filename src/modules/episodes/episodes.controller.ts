@@ -20,8 +20,8 @@ export class EpisodesController {
     @UseGuards(new AuthGuard())
     @UsePipes(new ValidationPipe())
     async generateEpisodes(@Body() generateEpisodesDto: GenerateEpisodesDto) {
-        const {config, feedUrl, type, name, logo, description, youtubeId} = generateEpisodesDto;
-        return this.episodesService.generateEpisodes(feedUrl, config, type, logo, name, description, youtubeId);
+        const {config, feedUrl, type, name, logo, description, youtubeChannelId, youtubePlaylistId} = generateEpisodesDto;
+        return this.episodesService.generateEpisodes(feedUrl, config, type, logo, name, description, youtubeChannelId, youtubePlaylistId);
     }
 
     /**

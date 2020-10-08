@@ -54,7 +54,8 @@ export class GenerateEpisodesDto {
     readonly name?: string;
     readonly logo?: string;
     readonly description?: string;
-    readonly youtubeId?: string;
+    readonly youtubeChannelId?: string;
+    readonly youtubePlaylistId?: string;
 }
 
 export class EpisodeDto {

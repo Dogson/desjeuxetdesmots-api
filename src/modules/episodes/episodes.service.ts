@@ -38,12 +38,14 @@ export class EpisodesService {
      * @param logo
      * @param name
      * @param description
-     * @param youtubeId
+     * @param youtubeChannelId
+     * @param youtubePlaylistId
      */
-    async generateEpisodes(feedUrl: string, config: MediaConfig, type: string, logo?: string, name?: string, description?: string, youtubeId?: string) {
+    async generateEpisodes(feedUrl: string, config: MediaConfig, type: string, logo?: string, name?: string, description?: string, youtubeChannelId?: string, youtubePlaylistId?: string) {
+        this.logger.log("Starting episode generation");
         let generatedEpisodes: EpisodeDto[] = [];
-        if (youtubeId) {
-            generatedEpisodes = await this.episodeGenerationService.generateYoutubeEpisodes(feedUrl, config, youtubeId, name);
+        if (youtubeChannelId) {
+            generatedEpisodes = await this.episodeGenerationService.generateYoutubeEpisodes(feedUrl, config, youtubeChannelId, youtubePlaylistId, name);
         } else {
             try {
                 generatedEpisodes = await this.episodeGenerationService.parseRssMedia(feedUrl, config, type, logo, description, name);
@@ -59,6 +61,7 @@ export class EpisodesService {
                 episodes.push(inserted);
             }
         });
+        this.logger.log(`${episodes.length} episodes generated`);
 
         try {
             await this._generateGamesForAllEpisodes(episodes, config);
@@ -283,6 +286,7 @@ export class EpisodesService {
             {
                 $group: {
                     _id: '$media.name',
+                    name: {'$first': '$media.name'},
                     config: {'$first': '$media.config'},
                     feedUrl: {'$first': '$media.feedUrl'},
                     type: {'$first': '$media.type'},
@@ -321,8 +325,15 @@ export class EpisodesService {
      * @param config
      */
     private async _generateGamesForAllEpisodes(episodes: Episode[], config: MediaConfig) {
+        this.logger.log("Generating games...");
         await asyncForEach(episodes, async (episode) => {
             await this.gameGenerationService.fetchAndPopulateGames(episode, config)
+
+            const total = episodes.length;
+            const index = episodes.map(ep => ep._id).findIndex(ep => ep === episode._id) + 1;
+            const percentage = Math.round((index / total) * 20);
+            const percentageLog = "█".repeat(percentage) + "░".repeat((20 - percentage)) + `   ${index}/${total}`;
+            this.logger.log(percentageLog);
         });
         this.logger.log("All games have been generated for this media");
     }
