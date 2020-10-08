@@ -155,6 +155,12 @@ export class EpisodeGenerationService {
                 ignoreEpisode = true;
             }
         })
+
+        config.episodeMustInclude && config.episodeMustInclude.forEach((string) => {
+            if (episode[config.parseProperty].indexOf(string) === -1) {
+                ignoreEpisode = true;
+            }
+        })
         if (ignoreEpisode) {
             return false;
         }

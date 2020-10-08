@@ -7,6 +7,7 @@ export interface MediaConfig {
     excludeStrings?: string[],
     excludeRegex?: RegExp[],
     ignoreEpisode?: string[],
+    episodeMustInclude?: string[],
     endOfParseStrings?: string[],
     parseProperty?: string,
     minDuration?: number
