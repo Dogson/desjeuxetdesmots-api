@@ -34,7 +34,7 @@ export class TasksService {
                 .mailerService
                 .sendMail({
                     to: process.env.ADMIN_RECIPIENT,
-                    subject: `🥃 Gamer JUICE 🎮 - ${generatedEpisodes.length} episode(s) ont été généré(s) - En attente de vérification `,
+                    subject: `💬 Des mots sur des jeux 🎮 - ${generatedEpisodes.length} episode(s) ont été généré(s) - En attente de vérification `,
                     template: 'newEpisodes',
                     context: {
                         nbEpisodes: generatedEpisodes.length
