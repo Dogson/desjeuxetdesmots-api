@@ -80,23 +80,32 @@ export class GamesService {
      * Find all games
      */
     async findAll(query: IGameQuery): Promise<GameResponseObject[]> {
-        const {page, limit, ...search} = query;
+        const {page, limit, filters, ...search} = query;
 
-        const gameResults: Game[] = await this.gameModel
-            .find(search)
-            .sort({releaseDate: -1})
-            .skip((page - 1) * limit)
-            .limit(limit)
-            .exec();
+        const gameQuery = this.gameModel.aggregate([
+            {
+                $lookup: {
+                    from: 'episodes',
+                    localField: 'episodes',
+                    foreignField: '_id',
+                    as: 'episodes'
+                }
+            },
+            {
+                $match: {
+                    ...search,
+                    episodes: {
+                        $elemMatch: filters
+                    },
+                }
+            },
+            {$skip: (page - 1) * limit},
+            {$limit: limit}
+        ])
 
-        const mappedGames = gameResults.map(game => game.toResponseObject());
 
-        await asyncForEach(mappedGames, async (game, i) => {
-            game.episodes = await this._getEpisodesFromGame(game);
-            mappedGames[i] = game;
-        });
-
-        return mappedGames.filter(game => game.episodes.length > 0);
+        const gameResults: Game[] = await gameQuery.exec();
+        return gameResults.filter(game => game.episodes.length > 0);
     }
 
     /**

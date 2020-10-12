@@ -87,7 +87,10 @@ export class GamesController {
     }
 
     private _parseGameQueryTypes(query: IGameQuery): IGameQuery {
-        return query;
+        return {
+            ...query,
+            filters: JSON.parse(String(query.filters))
+        }
     }
 
     private _mapQuerySearchableIndex(query: IGameQuery): IGameQuery {
