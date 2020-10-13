@@ -99,6 +99,7 @@ export class GamesService {
                     },
                 }
             },
+            {$sort: {_updatedAt: -1}},
             {$skip: (page - 1) * limit},
             {$limit: limit}
         ])
