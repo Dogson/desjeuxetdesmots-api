@@ -1,5 +1,5 @@
 import Parser = require("rss-parser");
-import decode = require('unescape');
+import decode = require("unescape");
 import _ = require("lodash");
 import * as moment from 'moment';
 import {Injectable, InternalServerErrorException} from "@nestjs/common";
