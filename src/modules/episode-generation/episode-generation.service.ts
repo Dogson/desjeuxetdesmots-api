@@ -34,15 +34,19 @@ export class EpisodeGenerationService {
         return feed.items.filter((entry) => {
             return this._filterEpisodeByMinDuration(entry, config.minDuration);
         }).map(function (entry) {
+            let epName = entry.title;
+            if (feedUrl.indexOf("zqsd")) {
+                epName = entry.itunes.subtitle;
+            }
             return {
-                name: entry.title,
+                name: epName,
                 image: type === "video" ? entry.mediaGroup["media:thumbnail"][0].$.url : entry.itunes.image || feed.image.url,
                 description: type === "video" ? entry.mediaGroup["media:description"][0] : _this._generateEpisodeDescription(entry.itunes.summary, feedUrl),
                 releaseDate: moment(entry.pubDate).toDate(),
                 fileUrl: type === "video" ? entry.link : entry.enclosure.url,
                 media: {
                     name: name || feed.title,
-                    logo: logo || feed.image.url,
+                    logo: logo || (feed.itunes && feed.itunes.image) || feed.image.url,
                     description: description || _this._generateMediaDescription(feed.description, feedUrl),
                     type: type,
                     config: config,
@@ -198,7 +202,9 @@ export class EpisodeGenerationService {
      * @param feedUrl
      */
     private _generateMediaDescription(description, feedUrl): string {
-        if (feedUrl && feedUrl.indexOf("soundcloud") > -1) {
+        if (feedUrl &&
+            (feedUrl.indexOf("soundcloud") > -1) ||
+            feedUrl.indexOf("zqsd")) {
             return description;
         }
         if (feedUrl && feedUrl.indexOf("acast") > -1) {
@@ -216,7 +222,9 @@ export class EpisodeGenerationService {
      * @param feedUrl
      */
     private _generateEpisodeDescription(description, feedUrl): string {
-        if (feedUrl && (feedUrl.indexOf("soundcloud") > -1 || feedUrl.indexOf("acast") > -1)) {
+        if (feedUrl && (feedUrl.indexOf("soundcloud") > -1 ||
+            feedUrl.indexOf("acast") > -1) ||
+            feedUrl.indexOf("zqsd") > -1) {
             return this._generateMediaDescription(description, feedUrl);
         }
     }
