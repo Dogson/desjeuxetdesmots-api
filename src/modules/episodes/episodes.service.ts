@@ -76,7 +76,7 @@ export class EpisodesService {
      * Generate games for all episode that have not generated games yet
      */
     async generateGames() {
-        const eps = await this.episodeModel.find({generatedGames: false}).exec();
+        const eps = await this.episodeModel.find({generatedGames: false, verified: false}).exec();
         await asyncForEach(eps, async (ep) => {
             await this._generateGamesForAllEpisodes(eps, ep.media.config);
         })
