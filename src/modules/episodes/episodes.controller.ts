@@ -25,6 +25,16 @@ export class EpisodesController {
     }
 
     /**
+     * POST /episodes/generateGames
+     */
+    @Post('generateGames')
+    @UseGuards(new AuthGuard())
+    @UsePipes(new ValidationPipe())
+    async generateGames() {
+        return this.episodesService.generateGames();
+    }
+
+    /**
      * POST /episodes
      * @param createEpisodeDto
      */

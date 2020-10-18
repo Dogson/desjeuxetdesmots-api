@@ -72,6 +72,15 @@ export class EpisodesService {
         return episodes.map(ep => ep.toResponseObject());
     }
 
+    /**
+     * Generate games for all episode that have not generated games yet
+     */
+    async generateGames() {
+        const eps = await this.episodeModel.find({generatedGames: false}).exec();
+        await asyncForEach(eps, async (ep) => {
+            await this._generateGamesForAllEpisodes(eps, ep.media.config);
+        })
+    }
 
     /**
      * Create a new episode

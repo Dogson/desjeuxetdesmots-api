@@ -35,13 +35,13 @@ export class EpisodeGenerationService {
             return this._filterEpisodeByMinDuration(entry, config.minDuration);
         }).map(function (entry) {
             let epName = entry.title;
-            if (feedUrl.indexOf("zqsd")) {
+            if (feedUrl.indexOf("zqsd") > -1) {
                 epName = entry.itunes.subtitle;
             }
             return {
                 name: epName,
                 image: type === "video" ? entry.mediaGroup["media:thumbnail"][0].$.url : entry.itunes.image || feed.image.url,
-                description: type === "video" ? entry.mediaGroup["media:description"][0] : _this._generateEpisodeDescription(entry.itunes.summary, feedUrl),
+                description: type === "video" ? entry.mediaGroup["media:description"][0] : _this._generateEpisodeDescription(entry, feedUrl),
                 releaseDate: moment(entry.pubDate).toDate(),
                 fileUrl: type === "video" ? entry.link : entry.enclosure.url,
                 media: {
@@ -204,10 +204,10 @@ export class EpisodeGenerationService {
     private _generateMediaDescription(description, feedUrl): string {
         if (feedUrl &&
             (feedUrl.indexOf("soundcloud") > -1) ||
-            feedUrl.indexOf("zqsd")) {
+            feedUrl.indexOf("zqsd") > -1) {
             return description;
         }
-        if (feedUrl && feedUrl.indexOf("acast") > -1) {
+        if (feedUrl && (feedUrl.indexOf("acast") > -1) || feedUrl.indexOf("afterhate") > -1) {
             let strippedDesc = this._strip_html_tags(description);
             if (strippedDesc.indexOf("Voir Acast") > -1) {
                 strippedDesc = strippedDesc.substring(0, this._strip_html_tags(description).indexOf('Voir Acast'))
@@ -221,11 +221,14 @@ export class EpisodeGenerationService {
      * @param description
      * @param feedUrl
      */
-    private _generateEpisodeDescription(description, feedUrl): string {
+    private _generateEpisodeDescription(entry, feedUrl): string {
         if (feedUrl && (feedUrl.indexOf("soundcloud") > -1 ||
-            feedUrl.indexOf("acast") > -1) ||
-            feedUrl.indexOf("zqsd") > -1) {
-            return this._generateMediaDescription(description, feedUrl);
+            feedUrl.indexOf("acast") > -1 ||
+            feedUrl.indexOf("zqsd") > -1)) {
+            return this._generateMediaDescription(entry.itunes.summary, feedUrl);
+        }
+        else if (feedUrl && feedUrl.indexOf("afterhate") > -1) {
+            return this._generateMediaDescription(entry['content:encoded'], feedUrl);
         }
     }
 
