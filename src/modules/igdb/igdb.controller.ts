@@ -15,7 +15,8 @@ export class IgdbController {
     @UseGuards(new AuthGuard())
     @UsePipes(new ValidationPipe())
     async findAllGames(@Query() query): Promise<any> {
-        const {search, limit = 15, noFilter = false} = query;
+        let {search, limit = 15, noFilter = false} = query;
+        noFilter = noFilter === "true";
         return this.igdbService.executeIgdbQuery(search, noFilter, limit, null);
     }
 }
