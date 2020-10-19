@@ -1,6 +1,6 @@
 import Parser = require("rss-parser");
-import decode = require("unescape");
 import _ = require("lodash");
+import decode_entity = require('entity-decode/node');
 import * as moment from 'moment';
 import {Injectable, InternalServerErrorException} from "@nestjs/common";
 import {MediaConfig} from "../episodes/model/media.model";
@@ -101,7 +101,7 @@ export class EpisodeGenerationService {
                 const id = youtubePlaylistId ? videoInfos.resourceId.videoId : video.id.videoId;
                 videoInfos.description = await this._getYoutubeVideoDescription(id) || videoInfos.description;
                 const episode = {
-                    name: decode(videoInfos.title),
+                    name: decode_entity(videoInfos.title),
                     description: videoInfos.description || " ",
                     fileUrl: `https://www.youtube.com/watch?v=${id}`,
                     image: videoInfos.thumbnails.medium && videoInfos.thumbnails.medium.url,
@@ -209,6 +209,7 @@ export class EpisodeGenerationService {
         }
         if (feedUrl && (feedUrl.indexOf("acast") > -1) || feedUrl.indexOf("afterhate") > -1) {
             let strippedDesc = this._strip_html_tags(description);
+            strippedDesc = decode_entity(strippedDesc);
             if (strippedDesc.indexOf("Voir Acast") > -1) {
                 strippedDesc = strippedDesc.substring(0, this._strip_html_tags(description).indexOf('Voir Acast'))
             }
