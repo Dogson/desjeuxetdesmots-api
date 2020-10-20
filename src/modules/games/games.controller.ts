@@ -89,7 +89,10 @@ export class GamesController {
     private _parseGameQueryTypes(query: IGameQuery): IGameQuery {
         return {
             ...query,
-            filters: JSON.parse(String(query.filters))
+            filters: {
+                ...JSON.parse(String(query.filters)),
+                'verified': true,
+            }
         }
     }
 

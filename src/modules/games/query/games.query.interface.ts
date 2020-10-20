@@ -6,7 +6,8 @@ export interface IGameQuery extends IDefaultQuery {
     igdbId?: string,
     filters?: string | {
         type?: string[],
-        media?: string[]
+        media?: string[],
+        verified?: boolean
     }
 }
 
