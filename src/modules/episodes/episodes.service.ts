@@ -77,9 +77,7 @@ export class EpisodesService {
      */
     async generateGames() {
         const eps = await this.episodeModel.find({generatedGames: false, verified: false}).exec();
-        await asyncForEach(eps, async (ep) => {
-            await this._generateGamesForAllEpisodes(eps, ep.media.config);
-        })
+        await this._generateGamesForAllEpisodes(eps);
     }
 
     /**
@@ -333,10 +331,10 @@ export class EpisodesService {
      * @param episodes
      * @param config
      */
-    private async _generateGamesForAllEpisodes(episodes: Episode[], config: MediaConfig) {
+    private async _generateGamesForAllEpisodes(episodes: Episode[], config?: MediaConfig) {
         this.logger.log("Generating games...");
         await asyncForEach(episodes, async (episode) => {
-            await this.gameGenerationService.fetchAndPopulateGames(episode, config)
+            await this.gameGenerationService.fetchAndPopulateGames(episode, config || episode.media.config)
 
             const total = episodes.length;
             const index = episodes.map(ep => ep._id).findIndex(ep => ep === episode._id) + 1;
