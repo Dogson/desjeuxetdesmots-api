@@ -7,6 +7,7 @@ import {MailerService} from "@nestjs-modules/mailer";
 @Injectable()
 export class TasksService {
     private logger = new Logger("TasksService");
+    private isCroning = false;
 
     constructor(
         @Inject(forwardRef(() => EpisodesService)) private readonly episodesService: EpisodesService,
@@ -16,6 +17,10 @@ export class TasksService {
 
     @Cron(CronExpression.EVERY_6_HOURS)
     async cronGenerateEpisodes() {
+        if (this.isCroning) {
+            return;
+        }
+        this.isCroning = true;
         const medias = await this.episodesService.findAllMedias();
         const generatedEpisodes = [];
         await asyncForEach(medias, async (media) => {
@@ -43,5 +48,7 @@ export class TasksService {
 
             this.logger.log(`Mail sent`);
         }
+
+        this.isCroning = false;
     }
 }
