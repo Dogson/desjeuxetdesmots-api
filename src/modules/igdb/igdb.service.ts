@@ -41,7 +41,7 @@ export class IgdbService {
                 token= await this.getTwitchToken();
             }
             const response = await axios({
-                url: process.env.IGDB_API_URL,
+                url: process.env.IGDB_API_GAMES_URL,
                 method: 'POST',
                 headers: {
                     'Client-ID': process.env.TWITCH_CLIENT_ID,
