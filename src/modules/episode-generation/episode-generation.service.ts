@@ -207,11 +207,10 @@ export class EpisodeGenerationService {
         if (feedUrl &&
             (feedUrl.indexOf("soundcloud") > -1 ||
                 feedUrl.indexOf("zqsd") > -1 ||
-                feedUrl.indexOf("ausha") > -1 ||
-                feedUrl.indexOf("blueprint") > -1)) {
+                feedUrl.indexOf("ausha") > -1)) {
             return description;
         }
-        if (feedUrl && (feedUrl.indexOf("acast") > -1) || feedUrl.indexOf("afterhate") > -1) {
+        if (feedUrl && (feedUrl.indexOf("acast") > -1 || feedUrl.indexOf("afterhate") > -1 || feedUrl.indexOf("blueprint") > -1)) {
             let strippedDesc = this._strip_html_tags(description);
             strippedDesc = decode_entity(strippedDesc);
             if (strippedDesc.indexOf("Voir Acast") > -1) {
