@@ -19,7 +19,6 @@ export async function addDevelopperToGames() {
         const token = await getTwitchToken();
         await asyncForEach(games, async (game) => {
             const companies = await executeIgdbQuery(token, game.igdbId);
-            console.log(companies);
             await db.collection("games").updateOne({_id: game._id}, {'$set': {companies: companies}});
             count++;
             console.log(count + "/" + games.length);

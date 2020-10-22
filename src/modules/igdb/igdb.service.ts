@@ -64,7 +64,7 @@ export class IgdbService {
     mappedGames(games): CreateGameDto[] {
         return games
             .filter((game) => {
-                return game.cover && game.screenshots;
+                return game.cover && game.screenshots && game.involved_companies;
             })
             .map((game) => {
                 const result = {
