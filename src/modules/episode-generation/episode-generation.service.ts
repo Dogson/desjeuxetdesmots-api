@@ -207,7 +207,8 @@ export class EpisodeGenerationService {
         if (feedUrl &&
             (feedUrl.indexOf("soundcloud") > -1 ||
                 feedUrl.indexOf("zqsd") > -1 ||
-                feedUrl.indexOf("ausha") > -1)) {
+                feedUrl.indexOf("ausha") > -1 ||
+                feedUrl.indexOf("blueprint") > -1)) {
             return description;
         }
         if (feedUrl && (feedUrl.indexOf("acast") > -1) || feedUrl.indexOf("afterhate") > -1) {
@@ -229,9 +230,11 @@ export class EpisodeGenerationService {
         if (feedUrl && (feedUrl.indexOf("soundcloud") > -1 ||
             feedUrl.indexOf("acast") > -1 ||
             feedUrl.indexOf("zqsd") > -1 ||
-            feedUrl.indexOf("ausha") > -1)) {
+            feedUrl.indexOf("ausha") > -1 ||
+            feedUrl.indexOf("blueprint") > -1)) {
             return this._generateMediaDescription(entry.itunes.summary, feedUrl);
-        } else if (feedUrl && feedUrl.indexOf("afterhate") > -1) {
+        } else if (feedUrl &&
+            (feedUrl.indexOf("afterhate") > -1)) {
             return this._generateMediaDescription(entry['content:encoded'], feedUrl);
         }
     }
