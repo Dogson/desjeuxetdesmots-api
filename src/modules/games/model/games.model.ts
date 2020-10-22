@@ -35,6 +35,9 @@ export class Game extends DefaultModel {
     })
     igdbId: string;
 
+    @Prop()
+    companies: {igdbId: string, name: string}[]
+
     @Prop({
         type: [Types.ObjectId],
         ref: "Episode"
@@ -58,7 +61,7 @@ GameSchema.methods = {
      * Mapping function that transforms a model into a correct Response Object
      */
     toResponseObject: function (): GameResponseObject {
-        const {_id, name, _createdAt, _updatedAt, cover, screenshot, releaseDate, episodes, igdbId} = this;
+        const {_id, name, _createdAt, _updatedAt, cover, screenshot, releaseDate, episodes, igdbId, companies} = this;
         return {
             _id,
             _createdAt,
@@ -68,7 +71,8 @@ GameSchema.methods = {
             screenshot,
             releaseDate,
             igdbId,
-            episodes
+            episodes,
+            companies
         }
     }
 };

@@ -14,7 +14,7 @@ export async function addDevelopperToGames() {
     const db = await client.db("gamerjuice");
 
     let count = 0;
-    const games = await db.collection("games").find({}).toArray();
+    const games = await db.collection("games").find({"companies.name": null}).toArray();
     try {
         const token = await getTwitchToken();
         await asyncForEach(games, async (game) => {
@@ -55,16 +55,6 @@ async function executeIgdbQuery(token, id): Promise<any> {
                 igdbId: company.company && company.company.id
             }
         });
-
-        // const companies = await axios({
-        //     url: process.env.IGDB_API_GAMES_URL,
-        //     method: 'POST',
-        //     headers: {
-        //         'Client-ID': process.env.TWITCH_CLIENT_ID,
-        //         'Authorization': `Bearer ${token}`
-        //     },
-        //     data: `fields involved_companies; where id = ${id};`
-        // });
     } catch (err) {
         throw new InternalServerErrorException(err);
     }

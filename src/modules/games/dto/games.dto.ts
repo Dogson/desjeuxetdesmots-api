@@ -17,6 +17,7 @@ export class CreateGameDto {
     readonly episodes: Types.ObjectId[];
     @IsString()
     readonly igdbId: string;
+    readonly companies: {igdbId: string, name: string}[];
 }
 
 /**
@@ -50,4 +51,5 @@ export class GameResponseObject {
     readonly releaseDate: Date;
     episodes?: Types.ObjectId[] | EpisodeResponseObject[];
     readonly igdbId: string;
+    readonly companies: {igdbId: string, name: string}[];
 }

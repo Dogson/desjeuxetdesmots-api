@@ -38,7 +38,7 @@ export class IgdbService {
         const filter = noFilter ? "" : " & (total_rating_count != null | hypes > 1)";
         try {
             if (!token) {
-                token= await this.getTwitchToken();
+                token = await this.getTwitchToken();
             }
             const response = await axios({
                 url: process.env.IGDB_API_GAMES_URL,
@@ -47,7 +47,7 @@ export class IgdbService {
                     'Client-ID': process.env.TWITCH_CLIENT_ID,
                     'Authorization': `Bearer ${token}`
                 },
-                data: `fields id, name, cover.url, screenshots.url, release_dates.date; sort total_rating_count desc; where (themes!= (42) ${filter}) & name~*"${search}"*; limit: ${limit};`
+                data: `fields id, name, cover.url, screenshots.url, release_dates.date, involved_companies.company.name, involved_companies.developer; sort total_rating_count desc; where (themes!= (42) ${filter}) & name~*"${search}"*; limit: ${limit};`
 
             });
             return response.data.length === 0 ? [] : this.mappedGames(response.data);
@@ -69,6 +69,16 @@ export class IgdbService {
             .map((game) => {
                 const result = {
                     ...game,
+                    companies: game.involved_companies
+                        .filter((item) => {
+                            return item.developer
+                        })
+                        .map((item) => {
+                            return {
+                                name: item.company.name,
+                                igdbId: item.company.id
+                            }
+                        }),
                     igdbId: game.id.toString(),
                     cover: game.cover && game.cover.url.replace('/t_thumb/', '/t_cover_big/').replace('//', 'https://'),
                     screenshot: game.screenshots && game.screenshots.length && game.screenshots[game.screenshots.length - 1].url.replace('/t_thumb/', '/t_screenshot_big/').replace('//', 'https://'),
@@ -80,6 +90,7 @@ export class IgdbService {
                             })
                     ) * 1000) : null
                 };
+                delete result.involved_companies;
                 delete result.release_dates;
                 delete result.screenshots;
                 delete result.id;
