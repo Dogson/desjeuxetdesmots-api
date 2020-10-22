@@ -11,21 +11,26 @@ export async function addMediaConfigToEpisode() {
     const db = await client.db("gamerjuice");
 
 
-    await db.collection("episodes").updateMany({"media.name": "GK Live"}, {
+    await db.collection("episodes").updateMany({"media.name": "Artefact"}, {
         "$set": {
             "media.config": {
-                "episodeMustInclude": ["GK Live"],
+                "episodeMustInclude": [],
                 "excludeStrings": [
-                    "GK Live Replay"
+                    "ARTEFACT",
+                    "Au programme",
+                    "pixels",
+                    "pixels flash",
+                    "dossier"
                 ],
                 "excludeRegex": [],
                 "ignoreEpisode": [],
                 "ignoreEpisodeRegex": [],
-                "endOfParseStrings": [],
-                "parseProperty": "name"
+                "endOfParseStrings": ["Bibliographie"],
+                "parseProperty": "description"
             },
         }
     });
+    console.log("done");
 
     await client.close();
 }
