@@ -37,6 +37,8 @@ export class EpisodeGenerationService {
             let epName = entry.title;
             if (feedUrl.indexOf("zqsd") > -1) {
                 epName = entry.itunes.subtitle;
+                // Cleaning the mess that are ZQSD publication dates
+                entry.pubDate = entry.pubDate.substring(4);
             }
             return {
                 name: epName,
@@ -219,7 +221,7 @@ export class EpisodeGenerationService {
 
     /**
      * generate the correct episode description given the format of the RSS feed
-     * @param description
+     * @param entry
      * @param feedUrl
      */
     private _generateEpisodeDescription(entry, feedUrl): string {
