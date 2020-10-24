@@ -245,6 +245,7 @@ export class EpisodeGenerationService {
             return str;
         else
             str = str.toString();
+        str = str.replace(/<p>/g, "\n");
         str = _.unescape(str.replace(/<\/?[^>]+(>|$)/g, ""));
         str = str.replace(/&nbsp;/g, ' ');
         return str;
