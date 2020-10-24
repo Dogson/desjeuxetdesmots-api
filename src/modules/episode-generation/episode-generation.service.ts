@@ -161,9 +161,12 @@ export class EpisodeGenerationService {
             }
         })
 
+        if (config.episodeMustInclude && config.episodeMustInclude.length > 0) {
+            ignoreEpisode = true;
+        }
         config.episodeMustInclude && config.episodeMustInclude.forEach((string) => {
-            if (episode[config.parseProperty].toUpperCase().indexOf(string.toUpperCase()) === -1) {
-                ignoreEpisode = true;
+            if (episode[config.parseProperty].toUpperCase().indexOf(string.toUpperCase()) > -1) {
+                ignoreEpisode = false;
             }
         })
         if (ignoreEpisode) {
@@ -204,19 +207,15 @@ export class EpisodeGenerationService {
      * @param feedUrl
      */
     private _generateMediaDescription(description, feedUrl): string {
-        if (feedUrl &&
-            (feedUrl.indexOf("soundcloud") > -1 ||
-                feedUrl.indexOf("zqsd") > -1 ||
-                feedUrl.indexOf("ausha") > -1)) {
-            return description;
-        }
-        if (feedUrl && (feedUrl.indexOf("acast") > -1 || feedUrl.indexOf("afterhate") > -1 || feedUrl.indexOf("blueprint") > -1)) {
+        if (feedUrl && (feedUrl.indexOf("acast") > -1 || feedUrl.indexOf("afterhate") > -1)) {
             let strippedDesc = this._strip_html_tags(description);
             strippedDesc = decode_entity(strippedDesc);
             if (strippedDesc.indexOf("Voir Acast") > -1) {
                 strippedDesc = strippedDesc.substring(0, this._strip_html_tags(description).indexOf('Voir Acast'))
             }
             return strippedDesc;
+        } else {
+            return description;
         }
     }
 
@@ -226,15 +225,11 @@ export class EpisodeGenerationService {
      * @param feedUrl
      */
     private _generateEpisodeDescription(entry, feedUrl): string {
-        if (feedUrl && (feedUrl.indexOf("soundcloud") > -1 ||
-            feedUrl.indexOf("acast") > -1 ||
-            feedUrl.indexOf("zqsd") > -1 ||
-            feedUrl.indexOf("ausha") > -1 ||
-            feedUrl.indexOf("blueprint") > -1)) {
-            return this._generateMediaDescription(entry.itunes.summary, feedUrl);
-        } else if (feedUrl &&
+        if (feedUrl &&
             (feedUrl.indexOf("afterhate") > -1)) {
             return this._generateMediaDescription(entry['content:encoded'], feedUrl);
+        } else {
+            return this._generateMediaDescription(entry.itunes.summary || entry.itunes.subtitle, feedUrl);
         }
     }
 
