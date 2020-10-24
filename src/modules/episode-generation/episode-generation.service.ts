@@ -14,7 +14,11 @@ import {asyncForEach} from "../../shared/utils/utils";
 export class EpisodeGenerationService {
 
     async parseRssMedia(feedUrl: string, config: MediaConfig, type: string, logo?: string, description?: string, name?: string): Promise<EpisodeDto[]> {
-        let parser = new Parser();
+        let parser = new Parser({
+            requestOptions: {
+                rejectUnauthorized: false
+            }
+        });
         if (type === "video") {
             parser = new Parser({
                     customFields: {
@@ -26,7 +30,6 @@ export class EpisodeGenerationService {
                 }
             );
         }
-
         const feed = await parser.parseURL(feedUrl);
         // eslint-disable-next-line @typescript-eslint/no-this-alias
         const _this = this;
@@ -207,7 +210,7 @@ export class EpisodeGenerationService {
      * @param feedUrl
      */
     private _generateMediaDescription(description, feedUrl): string {
-        if (feedUrl && (feedUrl.indexOf("acast") > -1 || feedUrl.indexOf("afterhate") > -1)) {
+        if (feedUrl && (feedUrl.indexOf("acast") > -1 || feedUrl.indexOf("afterhate") > -1 || feedUrl.indexOf("la-dev-team"))) {
             let strippedDesc = this._strip_html_tags(description);
             strippedDesc = decode_entity(strippedDesc);
             if (strippedDesc.indexOf("Voir Acast") > -1) {
