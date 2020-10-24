@@ -64,12 +64,12 @@ export class IgdbService {
     mappedGames(games): CreateGameDto[] {
         return games
             .filter((game) => {
-                return game.cover && game.screenshots && game.involved_companies;
+                return game.cover && game.screenshots;
             })
             .map((game) => {
                 const result = {
                     ...game,
-                    companies: game.involved_companies
+                    companies: game.involved_companies || []
                         .filter((item) => {
                             return item.developer
                         })
