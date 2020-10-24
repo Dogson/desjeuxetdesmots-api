@@ -79,7 +79,7 @@ export class EpisodeGenerationService {
         const media: MediaDto = {
             name: name || mediaInfos.title,
             logo: mediaInfos.thumbnails.medium.url,
-            description: mediaInfos.description || "",
+            description: mediaInfos.description || `Chaîne Youtube de ${name || mediaInfos.title}`,
             type: "video",
             config: config,
             feedUrl: feedUrl
