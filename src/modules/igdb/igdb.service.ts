@@ -67,9 +67,10 @@ export class IgdbService {
                 return game.cover && game.screenshots;
             })
             .map((game) => {
+                const involvedCompanies = game.involved_companies || [];
                 const result = {
                     ...game,
-                    companies: game.involved_companies || []
+                    companies: involvedCompanies
                         .filter((item) => {
                             return item.developer
                         })
