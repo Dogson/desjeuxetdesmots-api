@@ -15,8 +15,13 @@ export class TasksService {
     ) {
     }
 
-    @Cron(CronExpression.EVERY_6_HOURS)
+    @Cron(CronExpression.EVERY_4_HOURS)
     async cronGenerateEpisodes() {
+        this._generateEpisodesAndGames();
+        return;
+    }
+
+    async _generateEpisodesAndGames() {
         if (this.isCroning) {
             return;
         }
