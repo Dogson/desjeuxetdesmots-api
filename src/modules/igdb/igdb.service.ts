@@ -64,9 +64,22 @@ export class IgdbService {
     mappedGames(games): CreateGameDto[] {
         return games
             .filter((game) => {
-                return game.cover && game.screenshots;
+                return game.cover || game.screenshots;
             })
             .map((game) => {
+                let cover = game.cover;
+                let screenshot;
+                cover = cover && cover.url.replace('/t_thumb/', '/t_cover_big/').replace('//', 'https://');
+                if (game.screenshots && game.screenshots.length > 0) {
+                    screenshot = game.screenshots[game.screenshots.length - 1].url.replace('/t_thumb/', '/t_screenshot_big/').replace('//', 'https://');
+                }
+                if (!cover) {
+                    cover = screenshot;
+                }
+                if (!screenshot) {
+                    screenshot = cover;
+                }
+
                 const involvedCompanies = game.involved_companies || [];
                 const result = {
                     ...game,
@@ -81,8 +94,8 @@ export class IgdbService {
                             }
                         }),
                     igdbId: game.id.toString(),
-                    cover: game.cover && game.cover.url.replace('/t_thumb/', '/t_cover_big/').replace('//', 'https://'),
-                    screenshot: game.screenshots && game.screenshots.length && game.screenshots[game.screenshots.length - 1].url.replace('/t_thumb/', '/t_screenshot_big/').replace('//', 'https://'),
+                    cover: cover,
+                    screenshot: screenshot,
                     releaseDate: game.release_dates ? new Date(Math.min(...game.release_dates && game.release_dates.map((release_date) => {
                             return release_date.date;
                         })
