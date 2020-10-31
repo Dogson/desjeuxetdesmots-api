@@ -13,6 +13,8 @@ export class CreateEpisodeDto {
     readonly image: string;
     @IsString()
     readonly description: string;
+    @IsString()
+    readonly keywords: string;
     @IsUrl()
     readonly fileUrl: string;
     @IsDateString()
@@ -33,6 +35,9 @@ export class UpdateEpisodeDto {
     @IsString()
     @IsOptional()
     readonly description: string;
+    @IsString()
+    @IsOptional()
+    readonly keywords: string;
     @IsUrl()
     @IsOptional()
     readonly fileUrl: string;
@@ -65,6 +70,8 @@ export class EpisodeDto {
     readonly image: string;
     @IsString()
     readonly description: string;
+    @IsString()
+    readonly keywords?: string;
     @IsUrl()
     readonly fileUrl: string;
     @IsDateString()
@@ -82,6 +89,7 @@ export class EpisodeResponseObject {
     readonly name: string;
     readonly image: string;
     readonly description: string;
+    readonly keywords?: string;
     readonly fileUrl: string;
     readonly releaseDate: Date;
     readonly games: Types.ObjectId[];

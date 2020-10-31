@@ -23,6 +23,9 @@ export class Episode extends DefaultModel {
     })
     description: string;
 
+    @Prop()
+    keywords: string;
+
     @Prop({
         required: true,
     })
@@ -64,7 +67,7 @@ EpisodeSchema.methods = {
      * Mapping function that transforms a model into a correct Response Object
      */
     toResponseObject: function (): EpisodeResponseObject {
-        const {_id, name, _createdAt, _updatedAt, image, description, fileUrl, releaseDate, games, verified, media} = this;
+        const {_id, name, _createdAt, _updatedAt, image, description, keywords, fileUrl, releaseDate, games, verified, media} = this;
         return {
             _id,
             _createdAt,
@@ -72,6 +75,7 @@ EpisodeSchema.methods = {
             name,
             image,
             description,
+            keywords,
             fileUrl,
             releaseDate,
             games,

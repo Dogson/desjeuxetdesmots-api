@@ -49,6 +49,7 @@ export class EpisodeGenerationService {
                 description: type === "video" ? entry.mediaGroup["media:description"][0] : _this._generateEpisodeDescription(entry, feedUrl),
                 releaseDate: moment(entry.pubDate).toDate(),
                 fileUrl: type === "video" ? entry.link : entry.enclosure.url,
+                keywords: entry.itunes && entry.itunes.keywords,
                 media: {
                     name: name || feed.title,
                     logo: logo || (feed.itunes && feed.itunes.image) || feed.image.url,
