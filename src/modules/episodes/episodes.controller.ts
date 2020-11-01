@@ -30,8 +30,9 @@ export class EpisodesController {
     @Post('generateGames')
     @UseGuards(new AuthGuard())
     @UsePipes(new ValidationPipe())
-    async generateGames() {
-        return this.episodesService.generateGames();
+    generateGames() {
+        this.episodesService.generateGames();
+        return true;
     }
 
     /**
