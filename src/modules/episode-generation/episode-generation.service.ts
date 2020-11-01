@@ -53,7 +53,7 @@ export class EpisodeGenerationService {
                 media: {
                     name: name || feed.title,
                     logo: logo || (feed.itunes && feed.itunes.image) || feed.image.url,
-                    description: description || _this._generateMediaDescription(feed.description, feedUrl),
+                    description: description || _this._generateMediaDescription(feed.description, feedUrl) || name || feed.title,
                     type: type,
                     config: config,
                     feedUrl: feedUrl
