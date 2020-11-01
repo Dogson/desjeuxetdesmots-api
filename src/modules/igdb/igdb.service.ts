@@ -80,6 +80,17 @@ export class IgdbService {
                     screenshot = cover;
                 }
 
+                game.release_dates = game.release_dates && game.release_dates.map((release_date) => {
+                    return release_date.date;
+                })
+                    .filter((date) => {
+                        return date != null;
+                    });
+
+                const releaseDate = game.release_dates && game.release_dates.length > 0 ?
+                    new Date(Math.min(...game.release_dates) * 1000) :
+                    new Date(3376684800000);
+
                 const involvedCompanies = game.involved_companies || [];
                 const result = {
                     ...game,
@@ -96,13 +107,7 @@ export class IgdbService {
                     igdbId: game.id.toString(),
                     cover: cover,
                     screenshot: screenshot,
-                    releaseDate: game.release_dates ? new Date(Math.min(...game.release_dates && game.release_dates.map((release_date) => {
-                            return release_date.date;
-                        })
-                            .filter((date) => {
-                                return date != null;
-                            })
-                    ) * 1000) : null
+                    releaseDate: releaseDate
                 };
                 delete result.involved_companies;
                 delete result.release_dates;
