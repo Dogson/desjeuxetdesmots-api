@@ -7,7 +7,8 @@ async function bootstrap() {
     dotenv.config({path: "../.env"});
     const app = await NestFactory.create(AppModule, {cors: true});
     app.useGlobalFilters(new HttpErrorFilter());
-    await app.listen(process.env.PORT || 3000);
+    const server = await app.listen(process.env.PORT || 3000);
+    server.setTimeout(3600000);
 }
 
 bootstrap();
