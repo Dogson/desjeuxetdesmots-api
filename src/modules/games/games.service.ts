@@ -81,7 +81,6 @@ export class GamesService {
      */
     async findAll(query: IGameQuery): Promise<GameResponseObject[]> {
         const {page, limit, filters, ...search} = query;
-        console.log(filters);
 
         const match = {
             ...search
