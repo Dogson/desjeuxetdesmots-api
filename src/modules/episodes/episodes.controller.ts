@@ -6,7 +6,7 @@ import {IDefaultQuery} from "../../shared/const/default.query.interface";
 import {DEFAULT_EPISODE_QUERY} from "./query/episodes.query";
 import {AuthGuard} from "../../shared/handler/auth.guard";
 
-@Controller('episodes')
+@Controller()
 export class EpisodesController {
     private logger = new Logger('EpisodeController');
 
@@ -16,7 +16,7 @@ export class EpisodesController {
     /**
      * POST /episodes/generate
      */
-    @Post('generate')
+    @Post('episodes/generate')
     @UseGuards(new AuthGuard())
     @UsePipes(new ValidationPipe())
     async generateEpisodes(@Body() generateEpisodesDto: GenerateEpisodesDto) {
@@ -27,7 +27,7 @@ export class EpisodesController {
     /**
      * POST /episodes/generateGames
      */
-    @Post('generateGames')
+    @Post('episodes/generateGames')
     @UseGuards(new AuthGuard())
     @UsePipes(new ValidationPipe())
     generateGames() {
@@ -39,7 +39,7 @@ export class EpisodesController {
      * POST /episodes
      * @param createEpisodeDto
      */
-    @Post()
+    @Post('episodes')
     @UseGuards(new AuthGuard())
     @UsePipes(new ValidationPipe())
     async createEpisode(@Body() createEpisodeDto: CreateEpisodeDto): Promise<EpisodeResponseObject> {
@@ -52,7 +52,7 @@ export class EpisodesController {
      * @param id
      * @param updateEpisodeDto
      */
-    @Put(':id')
+    @Put('episodes/:id')
     @UseGuards(new AuthGuard())
     @UsePipes(new ValidationPipe())
     async updateEpisode(@Param('id') id: string, @Body() updateEpisodeDto: UpdateEpisodeDto): Promise<EpisodeResponseObject> {
@@ -63,7 +63,7 @@ export class EpisodesController {
     /**
      * GET /episodes
      */
-    @Get()
+    @Get('episodes')
     async findAllEpisode(@Query() query: IDefaultQuery): Promise<EpisodeResponseObject[]> {
         query = this._mapQueryWithDefault(query);
         return this.episodesService.findAll(query);
@@ -73,17 +73,17 @@ export class EpisodesController {
      * Get /episodes/:id
      * @param id
      */
-    @Get(':id')
+    @Get('episodes/:id')
     async findOneEpisode(@Param('id') id: string): Promise<EpisodeResponseObject> {
         return this.episodesService.findOne(id);
     }
 
 
     /**
-     * DELETE /episodes/:id
+     * DELETE /episodes
      * @param deleteDto
      */
-    @Delete()
+    @Delete('episodes')
     @UseGuards(new AuthGuard())
     async deleteEpisodes(@Body() deleteDto: UpdateEpisodeDto): Promise<any> {
         await this.episodesService.deleteMany(deleteDto);
@@ -94,7 +94,7 @@ export class EpisodesController {
      * DELETE /episodes/:id
      * @param id
      */
-    @Delete(':id')
+    @Delete('episodes/:id')
     @UseGuards(new AuthGuard())
     async deleteEpisode(@Param('id') id: string): Promise<any> {
         await this.episodesService.delete(id);
@@ -106,5 +106,14 @@ export class EpisodesController {
             ...DEFAULT_EPISODE_QUERY,
             ...query
         }
+    }
+
+
+    /**
+     * GET /medias
+     */
+    @Get('medias')
+    async findAllMedias() {
+        return this.episodesService.findAllMedias();
     }
 }
