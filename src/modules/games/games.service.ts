@@ -81,6 +81,16 @@ export class GamesService {
      */
     async findAll(query: IGameQuery): Promise<GameResponseObject[]> {
         const {page, limit, filters, ...search} = query;
+        console.log(filters);
+
+        const match = {
+            ...search
+        };
+        if (filters) {
+            match.episodes = {
+                $elemMatch: filters
+            }
+        }
 
         const gameQuery = this.gameModel.aggregate([
             {
@@ -92,12 +102,7 @@ export class GamesService {
                 }
             },
             {
-                $match: {
-                    ...search,
-                    episodes: {
-                        $elemMatch: filters
-                    },
-                }
+                $match: match
             },
             {$sort: {_updatedAt: -1}},
             {$skip: (page - 1) * limit},
