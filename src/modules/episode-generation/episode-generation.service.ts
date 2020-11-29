@@ -232,6 +232,11 @@ export class EpisodeGenerationService {
         if (feedUrl &&
             (feedUrl.indexOf("afterhate") > -1)) {
             return this._generateMediaDescription(entry['content:encoded'], feedUrl);
+        }
+        if (feedUrl &&
+            (feedUrl.indexOf("trouble-jeu") > -1)) {
+            console.log(entry);
+            return this._generateMediaDescription(entry.contentSnippet, feedUrl);
         } else {
             return this._generateMediaDescription(entry.itunes.summary || entry.itunes.subtitle, feedUrl);
         }
