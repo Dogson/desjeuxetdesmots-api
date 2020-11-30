@@ -17,40 +17,6 @@ Create your own ```.env``` file following the properties of the ```.env.example`
 
 ## Endpoints
 
-### Media
-
-To fetch all media without the episodes
-```
-GET /media
-```
-
-To fetch all media with their episodes
-```
-GET /media?withEpisodes=true
-```
-
-To fetch one media in particuliar (with episodes)
-```
-GET /media/:id
-```
-
-To generate a media with all its episodes from an RSS feed
-```
-POST /media/generate
-
-{
-   "feedUrl": "https://feeds.acast.com/public/shows/5b7ac427c6a58e726f576cff",
-}
-```
-
-### Game
-
-To fetch all games
-```
-GET /games/:id
-```
-
-To fetch one game
-```
-GET /games/:id
-```
+### /medias
+### /episodes
+### /games
