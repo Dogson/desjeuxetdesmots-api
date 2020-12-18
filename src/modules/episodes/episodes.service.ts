@@ -304,6 +304,29 @@ export class EpisodesService {
         ]).exec();
     }
 
+    async findOneMedia(name) {
+        const medias = await this.episodeModel.aggregate([
+            {
+                $group: {
+                    _id: '$media.name',
+                    name: {'$first': '$media.name'},
+                    config: {'$first': '$media.config'},
+                    feedUrl: {'$first': '$media.feedUrl'},
+                    type: {'$first': '$media.type'},
+                    logo: {'$first': '$media.logo'},
+                    description: {'$first': '$media.description'},
+                    total: {'$sum': 1}
+                },
+            },
+            {
+                $match: {
+                    name: name
+                }
+            },
+        ]).exec();
+        return medias && medias[0];
+    }
+
     /**
      * Find episode by id
      * @param id

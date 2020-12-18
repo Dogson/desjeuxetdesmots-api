@@ -116,4 +116,13 @@ export class EpisodesController {
     async findAllMedias() {
         return this.episodesService.findAllMedias();
     }
+
+    /**
+     * Get /medias/:name
+     * @param name
+     */
+    @Get('medias/:name')
+    async findOneMedia(@Param('name') name: string): Promise<any> {
+        return this.episodesService.findOneMedia(name);
+    }
 }
