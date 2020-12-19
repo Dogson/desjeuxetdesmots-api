@@ -7,6 +7,8 @@ import {MediaConfig} from "../model/media.model";
 export class MediaDto {
     @IsString()
     name: string;
+    @IsString()
+    searchableIndex?: string;
     @IsUrl()
     logo: string;
     @IsString()

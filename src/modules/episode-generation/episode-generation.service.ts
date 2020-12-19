@@ -52,6 +52,7 @@ export class EpisodeGenerationService {
                 keywords: entry.itunes && entry.itunes.keywords,
                 media: {
                     name: name || feed.title,
+                    searchableIndex: (name || feed.title).toUpperCase(),
                     logo: logo || (feed.itunes && feed.itunes.image) || feed.image.url,
                     description: description || _this._generateMediaDescription(feed.description, feedUrl) || name || feed.title,
                     type: type,
@@ -79,6 +80,7 @@ export class EpisodeGenerationService {
         feedUrl = feedUrl.replace("${channelId}", youtubeChannelId);
         const media: MediaDto = {
             name: name || mediaInfos.title,
+            searchableIndex: (name || mediaInfos.title).toUpperCase(),
             logo: mediaInfos.thumbnails.medium.url,
             description: mediaInfos.description || `Chaîne Youtube de ${name || mediaInfos.title}`,
             type: "video",
