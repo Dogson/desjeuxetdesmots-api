@@ -1,6 +1,6 @@
 import {Body, Controller, Delete, Get, Logger, Param, Post, Put, Query, UseGuards, UsePipes} from '@nestjs/common';
 import {GamesService} from "./games.service";
-import {CreateGameDto, GameResponseObject, UpdateGameDto} from "./dto/games.dto";
+import {CreateGameDto, GameResponseObject, SearchResponseObject, UpdateGameDto} from "./dto/games.dto";
 import {ValidationPipe} from "../../shared/handler/validation.pipe";
 import {DEFAULT_GAME_QUERY, GAME_SEARCHABLE_INDEX, IGameQuery} from "./query/games.query.interface";
 import {_parseDefaultQueryTypes} from "../../shared/const/default.query.interface";
@@ -44,11 +44,11 @@ export class GamesController {
      * GET /games
      */
     @Get()
-    async findAllGames(@Query() query: IGameQuery): Promise<GameResponseObject[]> {
+    async findAllGamesAndMedias(@Query() query: IGameQuery): Promise<SearchResponseObject> {
         query = this._mapQueryWithDefault(query);
         query = this._parseQueryTypes(query);
         query = this._mapQuerySearchableIndex(query);
-        return this.gamesService.findAll(query);
+        return this.gamesService.findAllGamesAndMedias(query);
     }
 
     /**

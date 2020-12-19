@@ -21,7 +21,7 @@ export class TasksService {
     }
 
     async _generateEpisodesAndGames() {
-        const medias = await this.episodesService.findAllMedias();
+        const medias = await this.episodesService.findAllMediasBySearch();
         const generatedEpisodes = [];
         await asyncForEach(medias, async (media) => {
             this.logger.log(`Generating ${media.name}`)

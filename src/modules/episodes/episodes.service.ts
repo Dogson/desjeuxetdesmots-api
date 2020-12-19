@@ -288,19 +288,27 @@ export class EpisodesService {
     /**
      * Find all media without duplicate
      */
-    async findAllMedias() {
+    async findAllMediasBySearch(search?) {
+        const match = search ? {
+            searchableIndex: search
+        } : {};
+
         return this.episodeModel.aggregate([
             {
                 $group: {
                     _id: '$media.name',
                     name: {'$first': '$media.name'},
+                    searchableIndex: {'$first': '$media.searchableIndex'},
                     config: {'$first': '$media.config'},
                     feedUrl: {'$first': '$media.feedUrl'},
                     type: {'$first': '$media.type'},
                     logo: {'$first': '$media.logo'},
                     description: {'$first': '$media.description'},
                 }
-            }
+            },
+            {
+                $match: match
+            },
         ]).exec();
     }
 

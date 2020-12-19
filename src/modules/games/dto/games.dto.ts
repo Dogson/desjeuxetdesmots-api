@@ -1,6 +1,7 @@
 import {IsString, IsDateString, IsOptional, IsUrl} from "class-validator";
 import {Types} from "mongoose";
 import {EpisodeResponseObject} from "../../episodes/dto/episodes.dto";
+import {MediaResponseObject} from "../../episodes/dto/media.dto";
 
 /**
  * Request object format used in POSTing a new game
@@ -52,4 +53,9 @@ export class GameResponseObject {
     episodes?: Types.ObjectId[] | EpisodeResponseObject[];
     readonly igdbId: string;
     readonly companies: {igdbId: string, name: string}[];
+}
+
+export class SearchResponseObject {
+    readonly games: GameResponseObject[];
+    readonly medias: MediaResponseObject[];
 }
