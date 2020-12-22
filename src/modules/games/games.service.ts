@@ -110,7 +110,7 @@ export class GamesService {
 
 
         const gameResults: Game[] = await gameQuery.exec();
-        const mediaResults = await this.episodesService.findAllMediasBySearch(search.searchableIndex);
+        const mediaResults = search.searchableIndex ? await this.episodesService.findAllMediasBySearch(search.searchableIndex) : [];
 
         return {
             games: gameResults.filter(game => game.episodes.length > 0),
