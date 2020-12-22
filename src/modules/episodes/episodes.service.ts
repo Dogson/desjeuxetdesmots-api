@@ -288,10 +288,8 @@ export class EpisodesService {
     /**
      * Find all media without duplicate
      */
-    async findAllMediasBySearch(search?) {
-        const match = search ? {
-            searchableIndex: search
-        } : {};
+    async findAllMediasBySearch(query?) {
+        const match = query || {};
 
         return this.episodeModel.aggregate([
             {
