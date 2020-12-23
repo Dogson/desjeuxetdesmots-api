@@ -330,6 +330,9 @@ export class EpisodesService {
                 }
             },
         ]).exec();
+        if (!medias || !medias[0]) {
+            throw new NotFoundException(ERROR_TYPES.not_found("media"));
+        }
         return medias && medias[0];
     }
 
