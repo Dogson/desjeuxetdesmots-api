@@ -9,7 +9,7 @@ import {
     NotFoundException
 } from "@nestjs/common";
 
-import {CreateGameDto, GameResponseObject, UpdateGameDto} from "./dto/games.dto";
+import {CreateGameDto, GameResponseObject, SearchResponseObject, UpdateGameDto} from "./dto/games.dto";
 import {InjectModel} from "@nestjs/mongoose";
 
 import {Game} from "./model/games.model";
@@ -77,9 +77,9 @@ export class GamesService {
     }
 
     /**
-     * Find all games
+     * Search games and medias
      */
-    async findAll(query: IGameQuery): Promise<GameResponseObject[]> {
+    async findAllGamesAndMedias(query: IGameQuery): Promise<SearchResponseObject> {
         const {page, limit, filters, ...search} = query;
 
         const match = {
@@ -110,7 +110,17 @@ export class GamesService {
 
 
         const gameResults: Game[] = await gameQuery.exec();
-        return gameResults.filter(game => game.episodes.length > 0);
+
+        const mediaFilters = {
+            type: filters["media.type"],
+            searchableIndex: query.searchableIndex
+        }
+        const mediaResults = await this.episodesService.findAllMediasBySearch(mediaFilters);
+
+        return {
+            games: gameResults.filter(game => game.episodes.length > 0),
+            medias: mediaResults
+        };
     }
 
     /**
@@ -213,8 +223,7 @@ export class GamesService {
         const newEpisodes = gameDoc.episodes.filter(ep => ep.toString() !== episodeToRemove.toString());
         if (newEpisodes.length === 0) {
             await gameDoc.deleteOne();
-        }
-        else {
+        } else {
             gameDoc.episodes = newEpisodes;
             await gameDoc.save();
         }

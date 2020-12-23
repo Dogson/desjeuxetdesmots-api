@@ -22,6 +22,9 @@ export class Media extends mongoose.Document {
     })
     name: string;
 
+    @Prop()
+    searchableIndex: string;
+
     @Prop({
         required: true
     })

@@ -288,8 +288,30 @@ export class EpisodesService {
     /**
      * Find all media without duplicate
      */
-    async findAllMedias() {
+    async findAllMediasBySearch(query?) {
+        const match = query || {};
+
         return this.episodeModel.aggregate([
+            {
+                $group: {
+                    _id: '$media.name',
+                    name: {'$first': '$media.name'},
+                    searchableIndex: {'$first': '$media.searchableIndex'},
+                    config: {'$first': '$media.config'},
+                    feedUrl: {'$first': '$media.feedUrl'},
+                    type: {'$first': '$media.type'},
+                    logo: {'$first': '$media.logo'},
+                    description: {'$first': '$media.description'},
+                }
+            },
+            {
+                $match: match
+            },
+        ]).exec();
+    }
+
+    async findOneMedia(name) {
+        const medias = await this.episodeModel.aggregate([
             {
                 $group: {
                     _id: '$media.name',
@@ -299,9 +321,19 @@ export class EpisodesService {
                     type: {'$first': '$media.type'},
                     logo: {'$first': '$media.logo'},
                     description: {'$first': '$media.description'},
+                    total: {'$sum': 1}
+                },
+            },
+            {
+                $match: {
+                    name: name
                 }
-            }
+            },
         ]).exec();
+        if (!medias || !medias[0]) {
+            throw new NotFoundException(ERROR_TYPES.not_found("media"));
+        }
+        return medias && medias[0];
     }
 
     /**
