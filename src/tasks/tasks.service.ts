@@ -24,12 +24,17 @@ export class TasksService {
         const medias = await this.episodesService.findAllMediasBySearch();
         const generatedEpisodes = [];
         await asyncForEach(medias, async (media) => {
-            this.logger.log(`Generating ${media.name}`)
-            const {feedUrl, config, type, name, logo, description} = media;
-            const episodes = await this.episodesService.generateEpisodes(feedUrl, config, type, logo, name, description);
-            episodes.forEach((episode) => {
-                generatedEpisodes.push(episode);
-            });
+            try{
+                this.logger.log(`Generating ${media.name}`)
+                const {feedUrl, config, type, name, logo, description} = media;
+                const episodes = await this.episodesService.generateEpisodes(feedUrl, config, type, logo, name, description);
+                episodes.forEach((episode) => {
+                    generatedEpisodes.push(episode);
+                });
+            }
+            catch(e) {
+                console.error(e);
+            }
         });
 
         generatedEpisodes.length > 0 && this.logger.log(`${generatedEpisodes.length} episodes générés`);
