@@ -1,5 +1,4 @@
 import Parser = require("rss-parser");
-import _ = require("lodash");
 import decode_entity = require('entity-decode/node');
 import * as moment from 'moment';
 import {Injectable, InternalServerErrorException} from "@nestjs/common";
@@ -17,6 +16,9 @@ export class EpisodeGenerationService {
         let parser = new Parser({
             requestOptions: {
                 rejectUnauthorized: false
+            },
+            customFields: {
+                item: ['description']
             }
         });
         if (type === "video") {
@@ -214,12 +216,10 @@ export class EpisodeGenerationService {
      */
     private _generateMediaDescription(description, feedUrl): string {
         if (feedUrl && (feedUrl.indexOf("acast") > -1 || feedUrl.indexOf("afterhate") > -1 || feedUrl.indexOf("la-dev-team"))) {
-            let strippedDesc = this._strip_html_tags(description);
-            strippedDesc = decode_entity(strippedDesc);
-            if (strippedDesc.indexOf("Voir Acast") > -1) {
-                strippedDesc = strippedDesc.substring(0, this._strip_html_tags(description).indexOf('Voir Acast'))
+            if (description.indexOf("Voir Acast") > -1) {
+                description = description.substring(0, description.indexOf('Voir Acast'))
             }
-            return strippedDesc;
+            return description;
         } else {
             return description;
         }
@@ -234,28 +234,8 @@ export class EpisodeGenerationService {
         if (feedUrl &&
             (feedUrl.indexOf("afterhate") > -1)) {
             return this._generateMediaDescription(entry['content:encoded'], feedUrl);
-        }
-        if (feedUrl &&
-            (feedUrl.indexOf("trouble-jeu") > -1)) {
-            return this._generateMediaDescription(entry.contentSnippet, feedUrl);
         } else {
-            return this._generateMediaDescription(entry.itunes.summary || entry.itunes.subtitle, feedUrl);
+            return this._generateMediaDescription(entry.description || entry.itunes.summary || entry.itunes.subtitle, feedUrl);
         }
     }
-
-    /**
-     * Strip all html tags from a string
-     * @param str
-     */
-    private _strip_html_tags(str): string {
-        if ((str == null) || (str === ''))
-            return str;
-        else
-            str = str.toString();
-        str = str.replace(/<p>/g, "\n");
-        str = _.unescape(str.replace(/<\/?[^>]+(>|$)/g, ""));
-        str = str.replace(/&nbsp;/g, ' ');
-        return str;
-    }
-
 }
