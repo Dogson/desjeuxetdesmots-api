@@ -251,7 +251,7 @@ export class GameGenerationService {
      * @private
      */
     private _removeSpecialCharacters(str) {
-        return str.replace(/[`~!@#$%^&*()_|+=?;«»'",.<>{}\[\]\\\/]/gi, '');
+        return str.replace(/[`~!@#$%^&--*()_|+=?;«»",.<>{}\[\]\\\/]/gi, '');
     };
 
     /**
