@@ -28,6 +28,7 @@ export class Episode extends DefaultModel {
 
     @Prop({
         required: true,
+        unique: true
     })
     fileUrl: string;
 
