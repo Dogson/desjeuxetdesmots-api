@@ -55,7 +55,7 @@ export class EpisodesService {
         }
         const episodes = [];
         await asyncForEach(generatedEpisodes, async (generatedEp) => {
-            const episode = await this.findByName(generatedEp.name);
+            const episode = await this.findByFileUrl(generatedEp.fileUrl);
             if (!episode) {
                 const inserted = await this.episodeModel.create(generatedEp);
                 episodes.push(inserted);
@@ -243,6 +243,20 @@ export class EpisodesService {
         let episode;
         try {
             episode = await this.episodeModel.findOne({name}).exec();
+        } catch (error) {
+            throw new HttpException(error.message, error.status);
+        }
+        return episode;
+    }
+
+    /**
+     * find one episode by name
+     * @param name
+     */
+    async findByFileUrl(fileUrl: string): Promise<Episode> {
+        let episode;
+        try {
+            episode = await this.episodeModel.findOne({fileUrl}).exec();
         } catch (error) {
             throw new HttpException(error.message, error.status);
         }
